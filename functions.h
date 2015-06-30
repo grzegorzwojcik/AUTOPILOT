@@ -8,6 +8,10 @@
 #ifndef FUNCTIONS_H_
 #define FUNCTIONS_H_
 
+#include <stddef.h>
+#include <stdlib.h>
+#include "stm32f4xx.h"
+
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
