@@ -78,6 +78,7 @@ task.h is included from an application file. */
 
 /* FreeRTOS includes. */
 #include "FreeRTOS_Source/include/FreeRTOS.h"
+#include "FreeRTOSConfig.h"
 #include "FreeRTOS_Source/include/task.h"
 #include "FreeRTOS_Source/include/timers.h"
 #include "FreeRTOS_Source/include/StackMacros.h"
@@ -2070,7 +2071,7 @@ BaseType_t xSwitchRequired = pdFALSE;
 			count is being unwound (when the scheduler is being unlocked). */
 			if( uxPendedTicks == ( UBaseType_t ) 0U )
 			{
-				//vApplicationTickHook();
+				vApplicationTickHook();
 			}
 			else
 			{
@@ -2087,7 +2088,7 @@ BaseType_t xSwitchRequired = pdFALSE;
 		scheduler is locked. */
 		#if ( configUSE_TICK_HOOK == 1 )
 		{
-			//vApplicationTickHook();
+			vApplicationTickHook();
 		}
 		#endif
 	}
