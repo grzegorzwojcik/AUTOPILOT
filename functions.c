@@ -51,10 +51,11 @@ void SYSTEM_ClockCheck(void){
   * @param  None
   * @retval None
   */
-void SysTick_Handler(void)
-{
-	GV_SystemCounter++;
-	if( GV_SystemCounter >= 2000 ){
-		GV_SystemCounter = 0;
-	}
-}
+
+//void SysTick_Handler(void)
+//{
+//	GV_SystemCounter++;
+//	if( GV_SystemCounter >= 2000 ){
+//		GV_SystemCounter = 0;
+//	}
+//}
