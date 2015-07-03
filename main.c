@@ -19,7 +19,9 @@
 #include "FreeRTOS_Source/include/FreeRTOS.h"
 #include "FreeRTOS_Source/include/task.h"
 
-//#include "functions.h"
+#include "ADC.h"
+#include "functions.h"
+
 
 /* Private macro */
 /* Private variables */
@@ -44,11 +46,16 @@ void vStartLEDTasks(unsigned portBASE_TYPE uxPriority);
 int main(void)
 {
 	/* TODO - Add your application code here */
+
+
 	initLED();
 	RCC_ClocksTypeDef ClksFreq;
 	RCC_GetClocksFreq(&ClksFreq);
-	vStartLEDTasks(mainFLASH_TASK_PRIORITY);
-	vTaskStartScheduler();
+	if( SYSTEM_ClockCheck() != RESET ){
+		vhADC_init();
+		vStartLEDTasks(mainFLASH_TASK_PRIORITY);
+		vTaskStartScheduler();
+	}
 }
 /****				END OF MAIN FUNCTION				***/
 

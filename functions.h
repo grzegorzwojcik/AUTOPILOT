@@ -22,8 +22,7 @@ volatile uint16_t GV_SystemCounter;	// System time counter, incrementing within 
 
 
 /* Private functions ---------------------------------------------------------*/
-void PLL_Configurattion(void);
-void SYSTEM_ClockCheck(void);
+FlagStatus SYSTEM_ClockCheck(void);
 
 #endif /* FUNCTIONS_H_ */
 
