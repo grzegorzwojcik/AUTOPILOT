@@ -10,18 +10,12 @@
 
 #include <stddef.h>
 #include "stm32f4xx.h"
+#include "functions.h"
 
 #include "FreeRTOS_Source/include/FreeRTOS.h"
 #include "FreeRTOS_Source/include/task.h"
 #include "FreeRTOS_Source/include/semphr.h"
 
-/*---------------------FreeRTOS SECTION---------------------*/
-			/* 		Task priorities.	 */
-#define mainADC_TASK_PRIORITY					( tskIDLE_PRIORITY + 2 )
-
-			/* 		Semaphores.			 */
-SemaphoreHandle_t xSemaphoreADC_VoltPwr;
-/*-----------------------------------------------------------*/
 
 			/* Hardware port definitions. */
 #define portGPIO_ADC			GPIOC

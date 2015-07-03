@@ -10,6 +10,8 @@
 **  Environment : Atollic TrueSTUDIO/STM32
 **
 **	MCU:		: STM32F407VET6
+**
+**	RTOS		: Free RTOS
 *****************************************************************************
 */
 
@@ -25,17 +27,6 @@
 
 
 
-/**
-**===========================================================================
-**
-**  Abstract: main program
-**
-**===========================================================================
-*/
-#define mainFLASH_TASK_PRIORITY					( tskIDLE_PRIORITY + 1 )
-
-
-
 /****					MAIN FUNCTION					***/
 int main(void)
 {
@@ -47,8 +38,8 @@ int main(void)
 		vhLED_initGPIO();
 		vhADC_init();
 
-		vStartLEDTasks(mainFLASH_TASK_PRIORITY);
-		vStartADC_VoltPwrTask(mainFLASH_TASK_PRIORITY);
+		vStartLEDTasks(tskLED_FLASH_PRIORITY);
+		vStartADC_VoltPwrTask(tskADC_TASK_PRIORITY);
 		vTaskStartScheduler();
 	}
 }

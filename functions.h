@@ -15,6 +15,16 @@
 #include "FreeRTOS_Source/include/task.h"
 #include "FreeRTOS_Source/include/semphr.h"
 
+/*=====================FreeRTOS SECTION=====================*/
+
+			/* 		Task priorities.		 */
+#define tskLED_FLASH_PRIORITY					( tskIDLE_PRIORITY + 1 )
+#define tskADC_TASK_PRIORITY					( tskIDLE_PRIORITY + 2 )
+
+			/* 			Semaphores.			 */
+SemaphoreHandle_t xSemaphoreADC_VoltPwr;
+/*===========================================================*/
+
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/

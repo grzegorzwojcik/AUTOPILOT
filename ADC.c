@@ -204,7 +204,7 @@ void vStartADC_VoltPwrTask(unsigned portBASE_TYPE uxPriority)
 	/* Creating task */
 	xTaskHandle xHandleTaskADC_VoltPwr;
 	xTaskCreate( vTaskADC_VoltPwr, "ADC_VoltPwr", configMINIMAL_STACK_SIZE,
-			NULL, mainADC_TASK_PRIORITY, &xHandleTaskADC_VoltPwr );
+			NULL, uxPriority, &xHandleTaskADC_VoltPwr );
 }
 
 

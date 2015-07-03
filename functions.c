@@ -50,7 +50,7 @@ void vTaskLED1(void * pvParameters)
 	for(;;)
 	{
 		/*		 250ms delay.	 */
-		vTaskDelayUntil( &xLastFlashTime, 250 );
+		vTaskDelayUntil( &xLastFlashTime, 500 );
 		/* 		Toggle D1.		 */
 		GPIO_ToggleBits(GPIOD, GPIO_Pin_8);
 	}
