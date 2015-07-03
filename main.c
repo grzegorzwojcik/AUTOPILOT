@@ -18,15 +18,12 @@
 #include "stm32f4xx.h"
 #include "FreeRTOS_Source/include/FreeRTOS.h"
 #include "FreeRTOS_Source/include/task.h"
+#include "FreeRTOS_Source/include/semphr.h"
 
 #include "ADC.h"
 #include "functions.h"
 
 
-/* Private macro */
-/* Private variables */
-/* Private function prototypes */
-/* Private functions */
 
 /**
 **===========================================================================
@@ -47,13 +44,14 @@ int main(void)
 {
 	/* TODO - Add your application code here */
 
-
+	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
 	initLED();
 	RCC_ClocksTypeDef ClksFreq;
 	RCC_GetClocksFreq(&ClksFreq);
 	if( SYSTEM_ClockCheck() != RESET ){
 		vhADC_init();
 		vStartLEDTasks(mainFLASH_TASK_PRIORITY);
+		vStartADC_VoltPwrTask(mainFLASH_TASK_PRIORITY);
 		vTaskStartScheduler();
 	}
 }

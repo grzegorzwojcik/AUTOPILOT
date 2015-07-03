@@ -45,15 +45,15 @@ void vhADC_initNVIC(void){
 
 	/* Enable the TIM1 Update interrupt */
 	NVIC_InitStructure.NVIC_IRQChannel = TIM1_UP_TIM10_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 4;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
 
 	/* Enable the TIM1 Capture interrupt */
 	NVIC_InitStructure.NVIC_IRQChannel = TIM1_CC_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 5;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
 }
@@ -178,16 +178,52 @@ void vhADC_init(void){
 	vhADC_initADC();
 }
 
+/****				TASKS				****/
+void vTaskADC_VoltPwr(void * pvParameters)
+{
+	/* Local variables. */
+	static uint32_t voltage = 0;
+	static uint16_t multiplier = 4400;
 
-/****			TIMER HANDLERS			****/
-void TIM1_CC_IRQHandler(void){
-	if( TIM_GetITStatus(TIM1, TIM_IT_CC1) != RESET ){
-			TIM_ClearITPendingBit(TIM1, TIM_IT_CC1);
-			ADC_SoftwareStartConv(ADC1); 	// programowe wyzwalanie pomiaru ADC
+	for(;;){
+		if( xSemaphoreTake(xSemaphoreADC_VoltPwr, 100 ) == pdTRUE)
+		{
+			uint32_t tmp = ADC_CONVERTED_VALUES[0] * multiplier;
+			voltage = tmp*3.3/4095;
 		}
+	}
 }
 
-void TIM1_UP_TIM10_IRQHandler(void){
+
+void vStartADC_VoltPwrTask(unsigned portBASE_TYPE uxPriority)
+{
+	/* Creating semaphore related to this task */
+	xSemaphoreADC_VoltPwr = NULL;
+	xSemaphoreADC_VoltPwr = xSemaphoreCreateBinary();
+
+	/* Creating task */
+	xTaskHandle xHandleTaskADC_VoltPwr;
+	xTaskCreate( vTaskADC_VoltPwr, "ADC_VoltPwr", configMINIMAL_STACK_SIZE,
+			NULL, mainADC_TASK_PRIORITY, &xHandleTaskADC_VoltPwr );
+}
+
+
+/****			TIMER HANDLERS			****/
+void TIM1_CC_IRQHandler(void)
+{
+	static BaseType_t xHigherPriorityTaskWoken;
+	xHigherPriorityTaskWoken = pdFALSE;
+
+	if( TIM_GetITStatus(TIM1, TIM_IT_CC1) != RESET ){
+		TIM_ClearITPendingBit(TIM1, TIM_IT_CC1);
+		xSemaphoreGiveFromISR( xSemaphoreADC_VoltPwr, &xHigherPriorityTaskWoken );
+		ADC_SoftwareStartConv(ADC1); 	// programowe wyzwalanie pomiaru ADC
+		portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+	}
+}
+
+void TIM1_UP_TIM10_IRQHandler(void)
+{
 	if( TIM_GetITStatus(TIM1, TIM_IT_Update) != RESET ){
 		TIM_ClearITPendingBit(TIM1, TIM_IT_Update);
 	}
