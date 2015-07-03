@@ -214,17 +214,19 @@ void TIM1_CC_IRQHandler(void)
 	static BaseType_t xHigherPriorityTaskWoken;
 	xHigherPriorityTaskWoken = pdFALSE;
 
-	if( TIM_GetITStatus(TIM1, TIM_IT_CC1) != RESET ){
+	if( TIM_GetITStatus(TIM1, TIM_IT_CC1) != RESET )
+	{
 		TIM_ClearITPendingBit(TIM1, TIM_IT_CC1);
-		xSemaphoreGiveFromISR( xSemaphoreADC_VoltPwr, &xHigherPriorityTaskWoken );
-		ADC_SoftwareStartConv(ADC1); 	// programowe wyzwalanie pomiaru ADC
-		portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+		xSemaphoreGiveFromISR( 	xSemaphoreADC_VoltPwr,
+								&xHigherPriorityTaskWoken );
+		ADC_SoftwareStartConv(ADC1);
 	}
 }
 
 void TIM1_UP_TIM10_IRQHandler(void)
 {
-	if( TIM_GetITStatus(TIM1, TIM_IT_Update) != RESET ){
+	if( TIM_GetITStatus(TIM1, TIM_IT_Update) != RESET )
+	{
 		TIM_ClearITPendingBit(TIM1, TIM_IT_Update);
 	}
 }

@@ -25,18 +25,54 @@ FlagStatus SYSTEM_ClockCheck(void){
 		return RESET;
 }
 
-/*-- Interrupts --------------------------------------------------------------*/
 
-/**
-  * @brief  This function handles SysTick Handler.
-  * @param  None
-  * @retval None
-  */
+void vhLED_initGPIO(void){
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
 
-//void SysTick_Handler(void)
-//{
-//	GV_SystemCounter++;
-//	if( GV_SystemCounter >= 2000 ){
-//		GV_SystemCounter = 0;
-//	}
-//}
+	GPIO_InitTypeDef GPIO_initStruct;
+	GPIO_initStruct.GPIO_Mode = GPIO_Mode_OUT;
+	GPIO_initStruct.GPIO_OType = GPIO_OType_PP;
+	GPIO_initStruct.GPIO_PuPd = GPIO_PuPd_UP;
+	GPIO_initStruct.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9;
+	GPIO_initStruct.GPIO_Speed = GPIO_Speed_100MHz;
+	GPIO_Init(GPIOD, &GPIO_initStruct);
+
+	GPIO_SetBits(GPIOD, GPIO_Pin_8);
+	GPIO_ResetBits(GPIOD, GPIO_Pin_9);
+}
+
+
+void vTaskLED1(void * pvParameters)
+{
+	portTickType xLastFlashTime;
+	xLastFlashTime = xTaskGetTickCount();
+
+	for(;;)
+	{
+		/*		 250ms delay.	 */
+		vTaskDelayUntil( &xLastFlashTime, 250 );
+		/* 		Toggle D1.		 */
+		GPIO_ToggleBits(GPIOD, GPIO_Pin_8);
+	}
+}
+
+
+void vTaskLED2(void * pvParameters)
+{
+	portTickType xLastFlashTime;
+	xLastFlashTime = xTaskGetTickCount();
+	for(;;)
+	{
+		/*		 500ms delay.	 */
+		vTaskDelayUntil( &xLastFlashTime, 500 );
+		/* 		Toggle D2.		 */
+		GPIO_ToggleBits(GPIOD, GPIO_Pin_9);
+	}
+}
+
+
+void vStartLEDTasks(unsigned portBASE_TYPE uxPriority){
+	xTaskHandle xHandleTaskLED1, xHandleTaskLED2;
+	xTaskCreate(vTaskLED1, "LED1", configMINIMAL_STACK_SIZE, NULL, uxPriority, &xHandleTaskLED1);
+	xTaskCreate(vTaskLED2, "LED2", configMINIMAL_STACK_SIZE, NULL, uxPriority, &xHandleTaskLED2);
+}
