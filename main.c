@@ -16,7 +16,7 @@
 /* Includes */
 #include <stddef.h>
 #include "stm32f4xx.h"
-
+#include "I2C.h"
 //#include "functions.h"
 
 /* Private macro */
@@ -36,10 +36,20 @@ int main(void)
   int i = 0;
 
   /* TODO - Add your application code here */
-
-  /* Infinite loop */
-  while (1)
+  SysTick_CLKSourceConfig(SystemCoreClock/1000);
+  SYSTEM_ClockCheck();
+  if ( GV_SystemReady )
   {
-	i++;
+	  vhI2C_initRCC();
+	  vhI2C_initGPIO();
+	  vhI2C_initI2C1();
+
+	  /* Infinite loop */
+	  while (1)
+	  {
+		i++;
+	  }
   }
+  else
+	  while(1);
 }
