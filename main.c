@@ -17,7 +17,7 @@
 #include <stddef.h>
 #include "stm32f4xx.h"
 #include "I2C.h"
-//#include "functions.h"
+#include "functions.h"
 
 /* Private macro */
 /* Private variables */
@@ -44,6 +44,12 @@ int main(void)
 	  vhI2C_initGPIO();
 	  vhI2C_initI2C1();
 
+		/* Check if device is connected */
+		if (!TM_I2C_IsDeviceConnected(I2C1, 0xD2)) {
+			/* Return error */
+			return TM_MPU6050_Result_DeviceNotConnected;
+		}
+
 	  /* Infinite loop */
 	  while (1)
 	  {
@@ -53,3 +59,5 @@ int main(void)
   else
 	  while(1);
 }
+
+
