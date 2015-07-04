@@ -18,8 +18,8 @@
 /*=====================FreeRTOS SECTION=====================*/
 
 			/* 		Task priorities.		 */
-#define tskLED_FLASH_PRIORITY					( tskIDLE_PRIORITY + 1 )
-#define tskADC_TASK_PRIORITY					( tskIDLE_PRIORITY + 2 )
+#define tskLED_FLASH_PRIORITY					( tskIDLE_PRIORITY )
+#define tskADC_TASK_PRIORITY					( tskIDLE_PRIORITY + 1 )
 
 			/* 			Semaphores.			 */
 SemaphoreHandle_t xSemaphoreADC_VoltPwr;

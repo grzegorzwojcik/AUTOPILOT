@@ -211,14 +211,15 @@ void vStartADC_VoltPwrTask(unsigned portBASE_TYPE uxPriority)
 /****			TIMER HANDLERS			****/
 void TIM1_CC_IRQHandler(void)
 {
-	static BaseType_t xHigherPriorityTaskWoken;
+	//static BaseType_t xHigherPriorityTaskWoken;	//This task is not that important
+											//We don't need to exit the interrupt to execute it asap
 	xHigherPriorityTaskWoken = pdFALSE;
 
 	if( TIM_GetITStatus(TIM1, TIM_IT_CC1) != RESET )
 	{
 		TIM_ClearITPendingBit(TIM1, TIM_IT_CC1);
 		xSemaphoreGiveFromISR( 	xSemaphoreADC_VoltPwr,
-								&xHigherPriorityTaskWoken );
+								NULL );
 		ADC_SoftwareStartConv(ADC1);
 	}
 }
