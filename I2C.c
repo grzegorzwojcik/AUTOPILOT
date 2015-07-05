@@ -71,39 +71,39 @@ void vhI2C_initI2C1(void)
 /*	===I2C hardware initialization===	end*/
 
 
-uint8_t TM_I2C_Read(I2C_TypeDef* I2Cx, uint8_t address, uint8_t reg) {
+uint8_t ucI2C_Read(I2C_TypeDef* I2Cx, uint8_t address, uint8_t reg) {
 	uint8_t received_data;
-	TM_I2C_Start(I2Cx, address, I2C_TRANSMITTER_MODE, I2C_ACK_DISABLE);
-	TM_I2C_WriteData(I2Cx, reg);
-	TM_I2C_Stop(I2Cx);
-	TM_I2C_Start(I2Cx, address, I2C_RECEIVER_MODE, I2C_ACK_DISABLE);
-	received_data = TM_I2C_ReadNack(I2Cx);
+	sI2C_Start(I2Cx, address, I2C_TRANSMITTER_MODE, I2C_ACK_DISABLE);
+	vhI2C_WriteData(I2Cx, reg);
+	ucI2C_Stop(I2Cx);
+	sI2C_Start(I2Cx, address, I2C_RECEIVER_MODE, I2C_ACK_DISABLE);
+	received_data = ucI2C_ReadNack(I2Cx);
 	return received_data;
 }
 
-uint8_t TM_I2C_ReadNoRegister(I2C_TypeDef* I2Cx, uint8_t address) {
+uint8_t ucI2C_ReadNoRegister(I2C_TypeDef* I2Cx, uint8_t address) {
 	uint8_t data;
-	TM_I2C_Start(I2Cx, address, I2C_RECEIVER_MODE, I2C_ACK_ENABLE);
+	sI2C_Start(I2Cx, address, I2C_RECEIVER_MODE, I2C_ACK_ENABLE);
 	/* Also stop condition happens */
-	data = TM_I2C_ReadNack(I2Cx);
+	data = ucI2C_ReadNack(I2Cx);
 	return data;
 }
 
-void TM_I2C_Write(I2C_TypeDef* I2Cx, uint8_t address, uint8_t reg, uint8_t data) {
-	TM_I2C_Start(I2Cx, address, I2C_TRANSMITTER_MODE, I2C_ACK_DISABLE);
-	TM_I2C_WriteData(I2Cx, reg);
-	TM_I2C_WriteData(I2Cx, data);
-	TM_I2C_Stop(I2Cx);
+void vhI2C_Write(I2C_TypeDef* I2Cx, uint8_t address, uint8_t reg, uint8_t data) {
+	sI2C_Start(I2Cx, address, I2C_TRANSMITTER_MODE, I2C_ACK_DISABLE);
+	vhI2C_WriteData(I2Cx, reg);
+	vhI2C_WriteData(I2Cx, data);
+	ucI2C_Stop(I2Cx);
 }
 
-void TM_I2C_WriteNoRegister(I2C_TypeDef* I2Cx, uint8_t address, uint8_t data) {
-	TM_I2C_Start(I2Cx, address, I2C_TRANSMITTER_MODE, I2C_ACK_DISABLE);
-	TM_I2C_WriteData(I2Cx, data);
-	TM_I2C_Stop(I2Cx);
+void vhI2C_WriteNoRegister(I2C_TypeDef* I2Cx, uint8_t address, uint8_t data) {
+	sI2C_Start(I2Cx, address, I2C_TRANSMITTER_MODE, I2C_ACK_DISABLE);
+	vhI2C_WriteData(I2Cx, data);
+	ucI2C_Stop(I2Cx);
 }
 
 /* Private functions */
-int16_t TM_I2C_Start(I2C_TypeDef* I2Cx, uint8_t address, uint8_t direction, uint8_t ack) {
+int16_t sI2C_Start(I2C_TypeDef* I2Cx, uint8_t address, uint8_t direction, uint8_t ack) {
 	/* Generate I2C start pulse */
 	I2Cx->CR1 |= I2C_CR1_START;
 
@@ -153,7 +153,7 @@ int16_t TM_I2C_Start(I2C_TypeDef* I2Cx, uint8_t address, uint8_t direction, uint
 	return 0;
 }
 
-void TM_I2C_WriteData(I2C_TypeDef* I2Cx, uint8_t data) {
+void vhI2C_WriteData(I2C_TypeDef* I2Cx, uint8_t data) {
 	/* Wait till I2C is not busy anymore */
 	TM_I2C_Timeout = TM_I2C_TIMEOUT;
 	while (!(I2Cx->SR1 & I2C_SR1_TXE) && TM_I2C_Timeout) {
@@ -164,7 +164,7 @@ void TM_I2C_WriteData(I2C_TypeDef* I2Cx, uint8_t data) {
 	I2Cx->DR = data;
 }
 
-uint8_t TM_I2C_ReadAck(I2C_TypeDef* I2Cx) {
+uint8_t ucI2C_ReadAck(I2C_TypeDef* I2Cx) {
 	uint8_t data;
 
 	/* Enable ACK */
@@ -185,7 +185,7 @@ uint8_t TM_I2C_ReadAck(I2C_TypeDef* I2Cx) {
 	return data;
 }
 
-uint8_t TM_I2C_ReadNack(I2C_TypeDef* I2Cx) {
+uint8_t ucI2C_ReadNack(I2C_TypeDef* I2Cx) {
 	uint8_t data;
 
 	/* Disable ACK */
@@ -209,7 +209,7 @@ uint8_t TM_I2C_ReadNack(I2C_TypeDef* I2Cx) {
 	return data;
 }
 
-uint8_t TM_I2C_Stop(I2C_TypeDef* I2Cx) {
+uint8_t ucI2C_Stop(I2C_TypeDef* I2Cx) {
 	/* Wait till transmitter not empty */
 	TM_I2C_Timeout = TM_I2C_TIMEOUT;
 	while (((!(I2Cx->SR1 & I2C_SR1_TXE)) || (!(I2Cx->SR1 & I2C_SR1_BTF)))) {
@@ -225,32 +225,32 @@ uint8_t TM_I2C_Stop(I2C_TypeDef* I2Cx) {
 	return 0;
 }
 
-uint8_t TM_I2C_IsDeviceConnected(I2C_TypeDef* I2Cx, uint8_t address) {
+uint8_t ucI2C_IsDeviceConnected(I2C_TypeDef* I2Cx, uint8_t address) {
 	uint8_t connected = 0;
 	/* Try to start, function will return 0 in case device will send ACK */
-	if (!TM_I2C_Start(I2Cx, address, I2C_TRANSMITTER_MODE, I2C_ACK_ENABLE)) {
+	if (!sI2C_Start(I2Cx, address, I2C_TRANSMITTER_MODE, I2C_ACK_ENABLE)) {
 		connected = 1;
 	}
 
 	/* STOP I2C */
-	TM_I2C_Stop(I2Cx);
+	ucI2C_Stop(I2Cx);
 
 	/* Return status */
 	return connected;
 }
 
-void TM_I2C_ReadMulti(I2C_TypeDef* I2Cx, uint8_t address, uint8_t reg, uint8_t* data, uint16_t count) {
+void vI2C_ReadMulti(I2C_TypeDef* I2Cx, uint8_t address, uint8_t reg, uint8_t* data, uint16_t count) {
 	uint8_t i;
-	TM_I2C_Start(I2Cx, address, I2C_TRANSMITTER_MODE, I2C_ACK_ENABLE);
-	TM_I2C_WriteData(I2Cx, reg);
-	TM_I2C_Stop(I2Cx);
-	TM_I2C_Start(I2Cx, address, I2C_RECEIVER_MODE, I2C_ACK_ENABLE);
+	sI2C_Start(I2Cx, address, I2C_TRANSMITTER_MODE, I2C_ACK_ENABLE);
+	vhI2C_WriteData(I2Cx, reg);
+	ucI2C_Stop(I2Cx);
+	sI2C_Start(I2Cx, address, I2C_RECEIVER_MODE, I2C_ACK_ENABLE);
 	for (i = 0; i < count; i++) {
 		if (i == (count - 1)) {
 			/* Last byte */
-			data[i] = TM_I2C_ReadNack(I2Cx);
+			data[i] = ucI2C_ReadNack(I2Cx);
 		} else {
-			data[i] = TM_I2C_ReadAck(I2Cx);
+			data[i] = ucI2C_ReadAck(I2Cx);
 		}
 	}
 }

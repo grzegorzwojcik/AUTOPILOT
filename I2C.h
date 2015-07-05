@@ -35,8 +35,6 @@ void vhI2C_initRCC(void);
 void vhI2C_initGPIO(void);
 void vhI2C_initI2C1(void);
 
-			/* Hardware related functions. */
-//uint8_t uc_I2C_Read(I2C_TypeDef* I2Cx, uint8_t address, uint8_t reg);
 
 
 /**
@@ -46,7 +44,7 @@ void vhI2C_initI2C1(void);
  * @param  reg: register to read from
  * @retval Data from slave
  */
-uint8_t TM_I2C_Read(I2C_TypeDef* I2Cx, uint8_t address, uint8_t reg);
+uint8_t ucI2C_Read(I2C_TypeDef* I2Cx, uint8_t address, uint8_t reg);
 
 /**
  * @brief  Reads multi bytes from slave
@@ -57,7 +55,7 @@ uint8_t TM_I2C_Read(I2C_TypeDef* I2Cx, uint8_t address, uint8_t reg);
  * @param  uint8_t count: how many bytes will be read
  * @retval None
  */
-void TM_I2C_ReadMulti(I2C_TypeDef* I2Cx, uint8_t address, uint8_t reg, uint8_t *data, uint16_t count);
+void vI2C_ReadMulti(I2C_TypeDef* I2Cx, uint8_t address, uint8_t reg, uint8_t *data, uint16_t count);
 
 /**
  * @brief  Reads byte from slave without specify register address
@@ -65,7 +63,7 @@ void TM_I2C_ReadMulti(I2C_TypeDef* I2Cx, uint8_t address, uint8_t reg, uint8_t *
  * @param  address: 7 bit slave address, left aligned, bits 7:1 are used, LSB bit is not used
  * @retval Data from slave
  */
-uint8_t TM_I2C_ReadNoRegister(I2C_TypeDef* I2Cx, uint8_t address);
+uint8_t TM_ucI2C_ReadNoRegister(I2C_TypeDef* I2Cx, uint8_t address);
 
 /**
  * @brief  Reads multi bytes from slave without setting register from where to start read
@@ -85,7 +83,7 @@ void TM_I2C_ReadMultiNoRegister(I2C_TypeDef* I2Cx, uint8_t address, uint8_t* dat
  * @param  data: data to be written
  * @retval None
  */
-void TM_I2C_Write(I2C_TypeDef* I2Cx, uint8_t address, uint8_t reg, uint8_t data);
+void vhI2C_Write(I2C_TypeDef* I2Cx, uint8_t address, uint8_t reg, uint8_t data);
 
 /**
  * @brief  Writes multi bytes to slave
@@ -112,7 +110,7 @@ void TM_I2C_WriteMulti(I2C_TypeDef* I2Cx, uint8_t address, uint8_t reg, uint8_t 
  * @param  data: data byte which will be send to device
  * @retval None
  */
-void TM_I2C_WriteNoRegister(I2C_TypeDef* I2Cx, uint8_t address, uint8_t data);
+void vhI2C_WriteNoRegister(I2C_TypeDef* I2Cx, uint8_t address, uint8_t data);
 
 /**
  * @brief  Writes multi bytes to slave without setting register from where to start write
@@ -132,7 +130,7 @@ void TM_I2C_WriteMultiNoRegister(I2C_TypeDef* I2Cx, uint8_t address, uint8_t* da
  *            - 0: Device is not connected
  *            - > 0: Device is connected
  */
-uint8_t TM_I2C_IsDeviceConnected(I2C_TypeDef* I2Cx, uint8_t address);
+uint8_t ucI2C_IsDeviceConnected(I2C_TypeDef* I2Cx, uint8_t address);
 
 /**
  * @brief  I2C Start condition
@@ -143,7 +141,7 @@ uint8_t TM_I2C_IsDeviceConnected(I2C_TypeDef* I2Cx, uint8_t address);
  * @retval Start condition status
  * @note   For private use
  */
-int16_t TM_I2C_Start(I2C_TypeDef* I2Cx, uint8_t address, uint8_t direction, uint8_t ack);
+int16_t sI2C_Start(I2C_TypeDef* I2Cx, uint8_t address, uint8_t direction, uint8_t ack);
 
 /**
  * @brief  Stop condition on I2C
@@ -151,7 +149,7 @@ int16_t TM_I2C_Start(I2C_TypeDef* I2Cx, uint8_t address, uint8_t direction, uint
  * @retval Stop condition status
  * @note   For private use
  */
-uint8_t TM_I2C_Stop(I2C_TypeDef* I2Cx);
+uint8_t ucI2C_Stop(I2C_TypeDef* I2Cx);
 
 /**
  * @brief  Reads byte without ack
@@ -159,7 +157,15 @@ uint8_t TM_I2C_Stop(I2C_TypeDef* I2Cx);
  * @retval Byte from slave
  * @note   For private use
  */
-uint8_t TM_I2C_ReadNack(I2C_TypeDef* I2Cx);
+uint8_t ucI2C_ReadNack(I2C_TypeDef* I2Cx);
+
+/**
+ * @brief  Reads byte without ack
+ * @param  *I2Cx: I2C used
+ * @retval Byte from slave
+ * @note   For private use
+ */
+uint8_t ucI2C_ReadNack(I2C_TypeDef* I2Cx);
 
 /**
  * @brief  Reads byte with ack
@@ -167,7 +173,7 @@ uint8_t TM_I2C_ReadNack(I2C_TypeDef* I2Cx);
  * @retval Byte from slave
  * @note   For private use
  */
-uint8_t TM_I2C_ReadAck(I2C_TypeDef* I2Cx);
+uint8_t ucI2C_ReadAck(I2C_TypeDef* I2Cx);
 
 /**
  * @brief  Writes to slave
@@ -176,7 +182,7 @@ uint8_t TM_I2C_ReadAck(I2C_TypeDef* I2Cx);
  * @retval None
  * @note   For private use
  */
-void TM_I2C_WriteData(I2C_TypeDef* I2Cx, uint8_t data);
+void vhI2C_WriteData(I2C_TypeDef* I2Cx, uint8_t data);
 
 
 
