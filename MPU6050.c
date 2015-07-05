@@ -25,7 +25,7 @@ MPU6050_t tMPU6050_initStruct(MPU6050_t* MPU6050_Struct)
 }
 
 
-TM_MPU6050_Result_t TM_MPU6050_ReadAll(MPU6050_t* DataStruct) {
+MPU6050_Result_t tMPU6050_ReadAll(MPU6050_t* DataStruct) {
 	uint8_t data[14];
 	int16_t temp;
 
@@ -45,6 +45,75 @@ TM_MPU6050_Result_t TM_MPU6050_ReadAll(MPU6050_t* DataStruct) {
 	DataStruct->Gyroscope_X = (int16_t)(data[8] << 8 | data[9]);
 	DataStruct->Gyroscope_Y = (int16_t)(data[10] << 8 | data[11]);
 	DataStruct->Gyroscope_Z = (int16_t)(data[12] << 8 | data[13]);
+
+	/* Return OK */
+	return TM_MPU6050_Result_Ok;
+}
+
+
+MPU6050_Result_t thMPU6050_Init(MPU6050_t* DataStruct, MPU6050_Device_t DeviceNumber, MPU6050_Accelerometer_t AccelerometerSensitivity, MPU6050_Gyroscope_t GyroscopeSensitivity) {
+	uint8_t temp;
+
+	/* Format I2C address */
+	DataStruct->Address = MPU6050_I2C_ADDR | (uint8_t)DeviceNumber;
+
+	/* Check if device is connected */
+	if (!ucI2C_IsDeviceConnected(MPU6050_I2C, DataStruct->Address)) {
+		/* Return error */
+		return TM_MPU6050_Result_DeviceNotConnected;
+	}
+
+	/* Check who I am */
+	if (ucI2C_Read(MPU6050_I2C, DataStruct->Address, MPU6050_WHO_AM_I) != MPU6050_I_AM) {
+		/* Return error */
+		return TM_MPU6050_Result_DeviceInvalid;
+	}
+
+	/* Wakeup MPU6050 */
+	vhI2C_Write(MPU6050_I2C, DataStruct->Address, MPU6050_PWR_MGMT_1, 0x00);
+
+	/* Config accelerometer */
+	temp = ucI2C_Read(MPU6050_I2C, DataStruct->Address, MPU6050_ACCEL_CONFIG);
+	temp = (temp & 0xE7) | (uint8_t)AccelerometerSensitivity << 3;
+	vhI2C_Write(MPU6050_I2C, DataStruct->Address, MPU6050_ACCEL_CONFIG, temp);
+
+	/* Config gyroscope */
+	temp = ucI2C_Read(MPU6050_I2C, DataStruct->Address, MPU6050_GYRO_CONFIG);
+	temp = (temp & 0xE7) | (uint8_t)GyroscopeSensitivity << 3;
+	vhI2C_Write(MPU6050_I2C, DataStruct->Address, MPU6050_GYRO_CONFIG, temp);
+
+	/* Set sensitivities for multiplying gyro and accelerometer data */
+	switch (AccelerometerSensitivity) {
+		case TM_MPU6050_Accelerometer_2G:
+			DataStruct->Acce_Mult = (float)1 / MPU6050_ACCE_SENS_2;
+			break;
+		case TM_MPU6050_Accelerometer_4G:
+			DataStruct->Acce_Mult = (float)1 / MPU6050_ACCE_SENS_4;
+			break;
+		case TM_MPU6050_Accelerometer_8G:
+			DataStruct->Acce_Mult = (float)1 / MPU6050_ACCE_SENS_8;
+			break;
+		case TM_MPU6050_Accelerometer_16G:
+			DataStruct->Acce_Mult = (float)1 / MPU6050_ACCE_SENS_16;
+		default:
+			break;
+	}
+
+	switch (GyroscopeSensitivity) {
+		case TM_MPU6050_Gyroscope_250s:
+			DataStruct->Gyro_Mult = (float)1 / MPU6050_GYRO_SENS_250;
+			break;
+		case TM_MPU6050_Gyroscope_500s:
+			DataStruct->Gyro_Mult = (float)1 / MPU6050_GYRO_SENS_500;
+			break;
+		case TM_MPU6050_Gyroscope_1000s:
+			DataStruct->Gyro_Mult = (float)1 / MPU6050_GYRO_SENS_1000;
+			break;
+		case TM_MPU6050_Gyroscope_2000s:
+			DataStruct->Gyro_Mult = (float)1 / MPU6050_GYRO_SENS_2000;
+		default:
+			break;
+	}
 
 	/* Return OK */
 	return TM_MPU6050_Result_Ok;

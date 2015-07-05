@@ -94,7 +94,7 @@
 typedef enum {
     TM_MPU6050_Device_0 = 0,
     TM_MPU6050_Device_1 = 0x02
-} TM_MPU6050_Device_t;
+} MPU6050_Device_t;
 
 /**
  * Result enumeration
@@ -111,7 +111,7 @@ typedef enum {
     TM_MPU6050_Result_Ok = 0x00,
     TM_MPU6050_Result_DeviceNotConnected,
     TM_MPU6050_Result_DeviceInvalid
-} TM_MPU6050_Result_t;
+} MPU6050_Result_t;
 
 /**
  * Set parameters for accelerometer range
@@ -131,7 +131,7 @@ typedef enum {
     TM_MPU6050_Accelerometer_4G = 0x01,
     TM_MPU6050_Accelerometer_8G = 0x02,
     TM_MPU6050_Accelerometer_16G = 0x03
-} TM_MPU6050_Accelerometer_t;
+} MPU6050_Accelerometer_t;
 
 /**
  * Set parameters for gyroscope range
@@ -151,7 +151,7 @@ typedef enum {
     TM_MPU6050_Gyroscope_500s = 0x01,
     TM_MPU6050_Gyroscope_1000s = 0x02,
     TM_MPU6050_Gyroscope_2000s = 0x03
-} TM_MPU6050_Gyroscope_t;
+} MPU6050_Gyroscope_t;
 
 typedef struct {
     /* Private */
@@ -169,5 +169,7 @@ typedef struct {
 } MPU6050_t;
 
 MPU6050_t tMPU6050_initStruct(MPU6050_t* MPU6050_Struct);
-TM_MPU6050_Result_t TM_MPU6050_ReadAll(MPU6050_t* DataStruct);
+MPU6050_Result_t tMPU6050_ReadAll(MPU6050_t* DataStruct);
+MPU6050_Result_t thMPU6050_Init(MPU6050_t* DataStruct, MPU6050_Device_t DeviceNumber,
+		MPU6050_Accelerometer_t AccelerometerSensitivity, MPU6050_Gyroscope_t GyroscopeSensitivity);
 #endif /* MPU6050_H_ */

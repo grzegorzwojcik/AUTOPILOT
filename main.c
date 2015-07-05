@@ -47,35 +47,7 @@ int main(void)
 	  vhI2C_initI2C1();
 
 	  MPU6050_t MPU6050_Struct = tMPU6050_initStruct(&MPU6050_Struct);
-	  uint8_t temp;
-
-				/* Check if device is connected */
-				if (!ucI2C_IsDeviceConnected(MPU6050_I2C, MPU6050_Struct.Address )) {
-					/* Return error */
-					return TM_MPU6050_Result_DeviceNotConnected;
-				}
-
-				/* Check who I am */
-				if (ucI2C_Read(MPU6050_I2C, MPU6050_Struct.Address, MPU6050_WHO_AM_I) != MPU6050_I_AM) {
-					/* Return error */
-					return TM_MPU6050_Result_DeviceInvalid;
-				}
-
-				/* Wakeup MPU6050 */
-				vhI2C_Write(MPU6050_I2C, MPU6050_Struct.Address, MPU6050_PWR_MGMT_1, 0x00);
-
-				/* Config accelerometer */
-				temp = ucI2C_Read(MPU6050_I2C, MPU6050_Struct.Address, MPU6050_ACCEL_CONFIG);
-				temp = (temp & 0xE7) | (uint8_t)MPU6050_ACCE_SENS_8 << 3;
-				vhI2C_Write(MPU6050_I2C, MPU6050_Struct.Address, MPU6050_ACCEL_CONFIG, temp);
-
-				/* Config gyroscope */
-				temp = ucI2C_Read(MPU6050_I2C, MPU6050_Struct.Address, MPU6050_GYRO_CONFIG);
-				temp = (temp & 0xE7) | (uint8_t)MPU6050_GYRO_SENS_500 << 3;
-				vhI2C_Write(MPU6050_I2C, MPU6050_Struct.Address, MPU6050_GYRO_CONFIG, temp);
-
-				MPU6050_Struct.Acce_Mult = (float)1 / MPU6050_ACCE_SENS_8;
-				MPU6050_Struct.Gyro_Mult = (float)1 / MPU6050_GYRO_SENS_500;
+	  thMPU6050_Init(&MPU6050_Struct, TM_MPU6050_Device_1, TM_MPU6050_Accelerometer_8G, TM_MPU6050_Gyroscope_500s);
 
 	  /* Infinite loop */
 	  while (1)
@@ -83,7 +55,7 @@ int main(void)
 
 		  if( GV_SystemCounter % 500 == 0 )
 		  {
-			  TM_MPU6050_ReadAll(&MPU6050_Struct);
+			  tMPU6050_ReadAll(&MPU6050_Struct);
 		  }
 		i++;
 	  }

@@ -63,17 +63,7 @@ void vI2C_ReadMulti(I2C_TypeDef* I2Cx, uint8_t address, uint8_t reg, uint8_t *da
  * @param  address: 7 bit slave address, left aligned, bits 7:1 are used, LSB bit is not used
  * @retval Data from slave
  */
-uint8_t TM_ucI2C_ReadNoRegister(I2C_TypeDef* I2Cx, uint8_t address);
-
-/**
- * @brief  Reads multi bytes from slave without setting register from where to start read
- * @param  *I2Cx: I2C used
- * @param  address: 7 bit slave address, left aligned, bits 7:1 are used, LSB bit is not used
- * @param  *data: pointer to data array to store data from slave
- * @param  count: how many bytes will be read
- * @retval None
- */
-void TM_I2C_ReadMultiNoRegister(I2C_TypeDef* I2Cx, uint8_t address, uint8_t* data, uint16_t count);
+uint8_t ucI2C_ReadNoRegister(I2C_TypeDef* I2Cx, uint8_t address);
 
 /**
  * @brief  Writes single byte to slave
@@ -84,17 +74,6 @@ void TM_I2C_ReadMultiNoRegister(I2C_TypeDef* I2Cx, uint8_t address, uint8_t* dat
  * @retval None
  */
 void vhI2C_Write(I2C_TypeDef* I2Cx, uint8_t address, uint8_t reg, uint8_t data);
-
-/**
- * @brief  Writes multi bytes to slave
- * @param  *I2Cx: I2C used
- * @param  address: 7 bit slave address, left aligned, bits 7:1 are used, LSB bit is not used
- * @param  reg: register to write to
- * @param  *data: pointer to data array to write it to slave
- * @param  count: how many bytes will be written
- * @retval None
- */
-void TM_I2C_WriteMulti(I2C_TypeDef* I2Cx, uint8_t address, uint8_t reg, uint8_t *data, uint16_t count);
 
 /**
  * @brief  Writes byte to slave without specify register address
@@ -111,16 +90,6 @@ void TM_I2C_WriteMulti(I2C_TypeDef* I2Cx, uint8_t address, uint8_t reg, uint8_t 
  * @retval None
  */
 void vhI2C_WriteNoRegister(I2C_TypeDef* I2Cx, uint8_t address, uint8_t data);
-
-/**
- * @brief  Writes multi bytes to slave without setting register from where to start write
- * @param  *I2Cx: I2C used
- * @param  address: 7 bit slave address, left aligned, bits 7:1 are used, LSB bit is not used
- * @param  *data: pointer to data array to write data to slave
- * @param  count: how many bytes you want to write
- * @retval None
- */
-void TM_I2C_WriteMultiNoRegister(I2C_TypeDef* I2Cx, uint8_t address, uint8_t* data, uint16_t count);
 
 /**
  * @brief  Checks if device is connected to I2C bus
