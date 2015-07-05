@@ -22,14 +22,15 @@
 #include "FreeRTOS_Source/include/task.h"
 #include "FreeRTOS_Source/include/semphr.h"
 
-#include "ADC.h"
+<<<<<<< HEAD
 #include "functions.h"
 #include "I2C.h"
 #include "MPU6050.h"
-/* Private macro */
-/* Private variables */
-/* Private function prototypes */
-/* Private functions */
+=======
+#include "ADC.h"
+#include "functions.h"
+>>>>>>> origin/ADC_PowerSupply
+
 
 
 /****					MAIN FUNCTION					***/
@@ -37,14 +38,40 @@ int main(void)
 {
 	/* TODO - Add your application code here */
 
+<<<<<<< HEAD
+  /* TODO - Add your application code here */
+  SysTick_CLKSourceConfig(SystemCoreClock/1000);
+  SYSTEM_ClockCheck();
+  if ( GV_SystemReady )
+  {
+	  vhI2C_initRCC();
+	  vhI2C_initGPIO();
+	  vhI2C_initI2C1();
+
+	  MPU6050_t MPU6050_Struct = tMPU6050_initStruct(&MPU6050_Struct);
+	  thMPU6050_Init(&MPU6050_Struct, TM_MPU6050_Device_1, TM_MPU6050_Accelerometer_8G, TM_MPU6050_Gyroscope_500s);
+
+	  /* Infinite loop */
+	  while (1)
+	  {
+
+		  if( GV_SystemCounter % 4 == 0 )
+		  {
+			  tMPU6050_ReadAll(&MPU6050_Struct);
+		  }
+		i++;
+	  }
+  }
+  else
+	  while(1);
+}
+
+=======
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
 
 	if( SYSTEM_ClockCheck() != RESET ){
 		vhLED_initGPIO();
 		vhADC_init();
-		vhI2C_initRCC();
-		vhI2C_initGPIO();
-		vhI2C_initI2C1();
 
 		vStartLEDTasks(tskLED_FLASH_PRIORITY);
 		vStartADC_VoltPwrTask(tskADC_TASK_PRIORITY);
@@ -52,4 +79,5 @@ int main(void)
 	}
 }
 /****				END OF MAIN FUNCTION				***/
+>>>>>>> origin/ADC_PowerSupply
 
