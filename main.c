@@ -53,7 +53,7 @@ int main(void)
 	  while (1)
 	  {
 
-		  if( GV_SystemCounter % 500 == 0 )
+		  if( GV_SystemCounter % 4 == 0 )
 		  {
 			  tMPU6050_ReadAll(&MPU6050_Struct);
 		  }

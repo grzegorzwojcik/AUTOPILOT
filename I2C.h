@@ -27,7 +27,7 @@
 
 			/* I2C1 setup definitions. */
 #define I2C1_ownAddress			0x00
-#define I2C1_clockSpeed			100000	/* Fast mode */
+#define I2C1_clockSpeed			400000	/* Fast mode */
 #define TM_I2C_TIMEOUT			20000	/* Ticks */
 
 /* Hardware related functions. */
