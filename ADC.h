@@ -42,7 +42,7 @@ void vhADC_init(void);		// All init functions above within 1 function
 
 
 			/*			 Tasks 			*/
-void vTaskADC_PwrSup(void);
+void vTaskADC_PwrSup(void * pvParameters);
 void vStartADC_VoltPwrTask(unsigned portBASE_TYPE uxPriority);
 
 

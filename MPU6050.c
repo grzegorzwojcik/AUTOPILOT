@@ -118,3 +118,36 @@ MPU6050_Result_t thMPU6050_Init(MPU6050_t* DataStruct, MPU6050_Device_t DeviceNu
 	/* Return OK */
 	return TM_MPU6050_Result_Ok;
 }
+
+
+/****				TASKS				****/
+void vTaskI2C_MPU6050(void * pvParameters)
+{
+	/* Local variables. */
+	MPU6050_t MPU6050_Struct = tMPU6050_initStruct(&MPU6050_Struct);
+
+	thMPU6050_Init(&MPU6050_Struct,
+			TM_MPU6050_Device_1,
+			TM_MPU6050_Accelerometer_8G,
+			TM_MPU6050_Gyroscope_500s);
+
+	for(;;){
+		if( xSemaphoreTake(xSemaphoreI2C_MPU6050, 100 ) == pdTRUE)
+		{
+			tMPU6050_ReadAll(&MPU6050_Struct);
+		}
+	}
+}
+
+
+void vStartI2C_MPU6050Task(unsigned portBASE_TYPE uxPriority)
+{
+	/* Creating semaphore related to this task */
+	xSemaphoreI2C_MPU6050 = NULL;
+	xSemaphoreI2C_MPU6050 = xSemaphoreCreateBinary();
+
+	/* Creating task */
+	xTaskHandle xHandleTaskI2C_MPU6050;
+	xTaskCreate( vTaskI2C_MPU6050, "I2C_MPU6050", configMINIMAL_STACK_SIZE,
+			NULL, uxPriority, &xHandleTaskI2C_MPU6050 );
+}
