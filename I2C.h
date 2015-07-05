@@ -35,93 +35,6 @@ void vhI2C_initRCC(void);
 void vhI2C_initGPIO(void);
 void vhI2C_initI2C1(void);
 
-
-/**
- * MPU6050 can have 2 different slave addresses, depends on it's input AD0 pin
- * This feature allows you to use 2 different sensors with this library at the same time
- *
- * Parameters:
- *     - TM_MPU6050_Device_0:
- *         AD0 pin is set to low
- *     - TM_MPU6050_Device_1:
- *         AD0 pin is set to high
- */
-typedef enum {
-    TM_MPU6050_Device_0 = 0,
-    TM_MPU6050_Device_1 = 0x02
-} TM_MPU6050_Device_t;
-
-/**
- * Result enumeration
- *
- * ParameterS:
- *     - TM_MPU6050_Result_Ok:
- *         Everything OK
- *     - TM_MPU6050_Result_DeviceNotConnected:
- *         There is no device with valid slave address
- *     - TM_MPU6050_Result_DeviceInvalid:
- *         Connected device with address is not MPU6050
- */
-typedef enum {
-    TM_MPU6050_Result_Ok = 0x00,
-    TM_MPU6050_Result_DeviceNotConnected,
-    TM_MPU6050_Result_DeviceInvalid
-} TM_MPU6050_Result_t;
-
-/**
- * Set parameters for accelerometer range
- *
- * Parameters:
- *     - TM_MPU6050_Accelerometer_2G:
- *         Range is +- 2G
- *     - TM_MPU6050_Accelerometer_4G:
- *         Range is +- 4G
- *     - TM_MPU6050_Accelerometer_8G:
- *         Range is +- 8G
- *     - TM_MPU6050_Accelerometer_16G:
- *         Range is +- 16G
- */
-typedef enum {
-    TM_MPU6050_Accelerometer_2G = 0x00,
-    TM_MPU6050_Accelerometer_4G = 0x01,
-    TM_MPU6050_Accelerometer_8G = 0x02,
-    TM_MPU6050_Accelerometer_16G = 0x03
-} TM_MPU6050_Accelerometer_t;
-
-/**
- * Set parameters for gyroscope range
- *
- * Parameters:
- *     - TM_MPU6050_Gyroscope_250s:
- *         Range is +- 250°/s
- *     - TM_MPU6050_Gyroscope_500s:
- *         Range is +- 500°/s
- *     - TM_MPU6050_Gyroscope_1000s:
- *         Range is +- 1000°/s
- *     - TM_MPU6050_Gyroscope_2000s:
- *         Range is +- 20000°/s
- */
-typedef enum {
-    TM_MPU6050_Gyroscope_250s = 0x00,
-    TM_MPU6050_Gyroscope_500s = 0x01,
-    TM_MPU6050_Gyroscope_1000s = 0x02,
-    TM_MPU6050_Gyroscope_2000s = 0x03
-} TM_MPU6050_Gyroscope_t;
-
-typedef struct {
-    /* Private */
-    uint8_t Address;
-    float Gyro_Mult;
-    float Acce_Mult;
-    /* Public */
-    int16_t Accelerometer_X;
-    int16_t Accelerometer_Y;
-    int16_t Accelerometer_Z;
-    int16_t Gyroscope_X;
-    int16_t Gyroscope_Y;
-    int16_t Gyroscope_Z;
-    float Temperature;
-} MPU6050_t;
 			/* Hardware related functions. */
 //uint8_t uc_I2C_Read(I2C_TypeDef* I2Cx, uint8_t address, uint8_t reg);
 
@@ -264,6 +177,8 @@ uint8_t TM_I2C_ReadAck(I2C_TypeDef* I2Cx);
  * @note   For private use
  */
 void TM_I2C_WriteData(I2C_TypeDef* I2Cx, uint8_t data);
+
+
 
 
 #endif /* I2C_H_ */
