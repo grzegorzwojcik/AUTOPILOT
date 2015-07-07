@@ -56,8 +56,9 @@ int main(void)
 
 		vStartLEDTasks(tskLED_FLASH_PRIORITY);
 		vStartADC_VoltPwrTask(tskADC_TASK_PRIORITY);
-		vStartI2C_MPU6050Task(tskI2C_MPU6050_PRIORITY);
 		vStartUART_NAVITask(tskUART_NAVI_PRIORITY);
+		vStartI2C_MPU6050Task(tskI2C_MPU6050_PRIORITY);
+
 
 		vTaskStartScheduler();
 	}

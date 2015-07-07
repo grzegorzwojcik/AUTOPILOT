@@ -8,9 +8,9 @@
 
 #include "functions.h"
 
-
 /* Private functions ---------------------------------------------------------*/
-FlagStatus SYSTEM_ClockCheck(void){
+FlagStatus SYSTEM_ClockCheck(void)
+{
 
 	GV_SystemReady		= 0;
 	RCC_ClocksTypeDef ClksFreq;
@@ -26,7 +26,8 @@ FlagStatus SYSTEM_ClockCheck(void){
 }
 
 
-void vhLED_initGPIO(void){
+void vhLED_initGPIO(void)
+{
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
 
 	GPIO_InitTypeDef GPIO_initStruct;
@@ -63,7 +64,7 @@ void vTaskLED2(void * pvParameters)
 	xLastFlashTime = xTaskGetTickCount();
 	for(;;)
 	{
-		/*		 500ms delay.	 */
+		/*		 250 delay.	 */
 		vTaskDelayUntil( &xLastFlashTime, 250 );
 		/* 		Toggle D2.		 */
 		GPIO_ToggleBits(GPIOD, GPIO_Pin_9);
@@ -71,7 +72,8 @@ void vTaskLED2(void * pvParameters)
 }
 
 
-void vStartLEDTasks(unsigned portBASE_TYPE uxPriority){
+void vStartLEDTasks(unsigned portBASE_TYPE uxPriority)
+{
 	xTaskHandle xHandleTaskLED1, xHandleTaskLED2;
 	xTaskCreate(vTaskLED1, "LED1", configMINIMAL_STACK_SIZE, NULL, uxPriority, &xHandleTaskLED1);
 	xTaskCreate(vTaskLED2, "LED2", configMINIMAL_STACK_SIZE, NULL, uxPriority, &xHandleTaskLED2);

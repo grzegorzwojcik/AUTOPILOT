@@ -25,9 +25,11 @@
 
 			/* 			Semaphores.			 */
 SemaphoreHandle_t xSemaphoreADC_VoltPwr;
-SemaphoreHandle_t xSemaphoreI2C_MPU6050;
 SemaphoreHandle_t xSemaphoreUART_NAVITX;
 SemaphoreHandle_t xSemaphoreUART_NAVIRX;
+
+			/* 			Queues.			 */
+QueueHandle_t xQueueUART_2xMPU_t;
 /*===========================================================*/
 
 /* Private define ------------------------------------------------------------*/
@@ -45,7 +47,6 @@ void vhLED_initGPIO(void);
 void vTaskLED1(void * pvParameters);
 void vTaskLED2(void * pvParameters);
 void vStartLEDTasks(unsigned portBASE_TYPE uxPriority);
-
 #endif /* FUNCTIONS_H_ */
 
 

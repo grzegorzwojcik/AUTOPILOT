@@ -11,6 +11,7 @@
 #include "functions.h"
 #include "stm32f4xx.h"
 #include "stddef.h"
+#include "MPU6050.h"
 
 #include "FreeRTOS_Source/include/FreeRTOS.h"
 #include "FreeRTOS_Source/include/task.h"

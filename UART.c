@@ -131,19 +131,31 @@ void vUART_ClearBuffer(UARTbuffer_t	UART_buffer){
 }
 
 /****				TASKS				****/
+
+/*-----------------------------------------------------------
+* @brief Task Name 		: vTaskUART_NAVI
+* @brief Description    : This task is responsible for sending proper data frames to the
+* 							 NAVIGATION & FAULT INJECTION BOARD by managing a semaphore
+*/
 void vTaskUART_NAVI(void * pvParameters)
 {
 	/* Local variables. */
 	portTickType xLastFlashTime;
 	xLastFlashTime = xTaskGetTickCount();
+	MPU6050_t MPU6050_Structure = tMPU6050_initStruct(&MPU6050_Structure);
 
 	for(;;){
 		/*		 500ms delay.	 */
 		vTaskDelayUntil( &xLastFlashTime, 500 );
-		vUART_ClearBuffer(UART_NaviBufferSEND);
-		sprintf(GV_bufferNAVIsend, "%c,8,%i,%i,%i,0,*CRC\n\r", NAVI_DF_CHAR, 22, 33, 44);
-		vUART_puts(USART2, GV_bufferNAVIsend);
+		xQueueReceive(xQueueUART_2xMPU_t, &MPU6050_Structure, 100);
+		xSemaphoreGive(xSemaphoreUART_NAVITX);
 
+		vUART_ClearBuffer(UART_NaviBufferSEND);
+		sprintf(GV_bufferNAVIsend, "%c,8,%i,%i,%i,0,*CRC\n\r", NAVI_DF_CHAR,
+				MPU6050_Structure.Gyroscope_X,
+				MPU6050_Structure.Gyroscope_Y,
+				MPU6050_Structure.Gyroscope_Z);
+		vUART_puts(USART2, GV_bufferNAVIsend);
 	}
 }
 
@@ -157,9 +169,13 @@ void vStartUART_NAVITask(unsigned portBASE_TYPE uxPriority)
 	xSemaphoreUART_NAVITX = NULL;
 	xSemaphoreUART_NAVITX = xSemaphoreCreateBinary();
 
-	/* Creating task */
+
+	/* Creating queue which is responsible for handling MPU6050_t typedef data */
+	xQueueUART_2xMPU_t = xQueueCreate(2, sizeof(MPU6050_t) );
+
+	/* Creating task  */
 	xTaskHandle xHandleTaskUART_NAVI;
-	xTaskCreate( vTaskUART_NAVI, "UART_NAVI", configMINIMAL_STACK_SIZE,
+	xTaskCreate( vTaskUART_NAVI, "UART_NAVI_TX", configMINIMAL_STACK_SIZE,
 			NULL, uxPriority, &xHandleTaskUART_NAVI );
 }
 

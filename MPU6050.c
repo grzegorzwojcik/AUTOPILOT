@@ -129,28 +129,32 @@ MPU6050_Result_t thMPU6050_Init(MPU6050_t* DataStruct, MPU6050_Device_t DeviceNu
 void vTaskI2C_MPU6050(void * pvParameters)
 {
 	/* Local variables. */
-	MPU6050_t MPU6050_Struct = tMPU6050_initStruct(&MPU6050_Struct);
+	portTickType xLastFlashTime;
+	MPU6050_t MPU6050_Struct;
+
+	xLastFlashTime = xTaskGetTickCount();
+	MPU6050_Struct = tMPU6050_initStruct(&MPU6050_Struct);
 
 	thMPU6050_Init(&MPU6050_Struct,
 			TM_MPU6050_Device_1,
 			TM_MPU6050_Accelerometer_2G,
 			TM_MPU6050_Gyroscope_250s);
 
-	for(;;){
-		if( xSemaphoreTake(xSemaphoreI2C_MPU6050, 100 ) == pdTRUE)
+	for(;;)
+	{
+		tMPU6050_ReadAll(&MPU6050_Struct);
+		if( xSemaphoreTake(xSemaphoreUART_NAVITX, 100))
 		{
-			tMPU6050_ReadAll(&MPU6050_Struct);
+			xQueueSend(xQueueUART_2xMPU_t, &MPU6050_Struct, 100);
 		}
+		/*		50 Hz loop / 20ms delay	*/
+		vTaskDelayUntil(&xLastFlashTime, 20 );
 	}
 }
 
 
 void vStartI2C_MPU6050Task(unsigned portBASE_TYPE uxPriority)
 {
-	/* Creating semaphore related to this task */
-	xSemaphoreI2C_MPU6050 = NULL;
-	xSemaphoreI2C_MPU6050 = xSemaphoreCreateBinary();
-
 	/* Creating task */
 	xTaskHandle xHandleTaskI2C_MPU6050;
 	xTaskCreate( vTaskI2C_MPU6050, "I2C_MPU6050", configMINIMAL_STACK_SIZE,

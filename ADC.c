@@ -220,8 +220,6 @@ void TIM1_CC_IRQHandler(void)
 		TIM_ClearITPendingBit(TIM1, TIM_IT_CC1);
 		xSemaphoreGiveFromISR( 	xSemaphoreADC_VoltPwr,
 								NULL );
-		xSemaphoreGiveFromISR( 	xSemaphoreI2C_MPU6050,
-								NULL );
 		ADC_SoftwareStartConv(ADC1);
 	}
 }
