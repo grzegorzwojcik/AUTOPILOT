@@ -20,10 +20,40 @@
 #define portGPIO_UART_GPS			GPIOB
 
 			/* Hardware pin definitions. */
-#define pinUART_1TX			GPIO_Pin_6		//UART_1TX connected to GPS Rx
-#define pinUART_1RX			GPIO_Pin_7		//UART_1RX connected to GPS Tx
-#define pinUART_2TX			GPIO_Pin_5		//UART_2TX connected to NAVI Rx
-#define pinUART_2RX			GPIO_Pin_6		//UART_2RX connected to NAVI Tx
+#define pinUART_1TX					GPIO_Pin_6		//UART_1TX connected to the GPS Rx
+#define pinUART_1RX					GPIO_Pin_7		//UART_1RX connected to the GPS Tx
+#define pinUART_2TX					GPIO_Pin_5		//UART_2TX connected to the NAVI Rx
+#define pinUART_2RX					GPIO_Pin_6		//UART_2RX connected to the NAVI Tx
 
+#define pinSourceUART_1TX			GPIO_PinSource6
+#define pinSourceUART_1RX			GPIO_PinSource7
+#define pinSourceUART_2TX			GPIO_PinSource5
+#define pinSourceUART_2RX			GPIO_PinSource6
+
+			/* Software UART definitions. */
+#define baudRateGPS					9600
+#define baudRateNAVI				115200
+#define NAVI_BUFFER_LENGTH			30
+#define NAVI_DF_CHAR				'#'				// Data frame starting character
+volatile unsigned char GV_bufforNAVIsend[BTM_BUFFOR_LENGTH];
+volatile unsigned char GV_bufforNAVIrec[BTM_BUFFOR_LENGTH];
+
+/* Hardware related functions. */
+void vhUART_initNaviRCC(void);
+void vhUART_initNaviGPIO(void);
+void vhUART_initNaviUART2(void);
+
+/* Hardware related functions. */
+void vhUART_initGpsRCC(void);
+void vhUART_initGpsGPIO(void);
+void vhUART_initGpsUART2(void);
+
+/* Software related functions. */
+uint8_t ucUART_calculateCRC(char *Word, char StartChar ,uint8_t Length);
+void vUART_puts(USART_TypeDef* USARTx, volatile char *s);
+
+/*			 Tasks 			*/
+void vTaskUART_NAVI(void * pvParameters);
+void vStartUART_NAVITask(unsigned portBASE_TYPE uxPriority);
 
 #endif /* UART_H_ */

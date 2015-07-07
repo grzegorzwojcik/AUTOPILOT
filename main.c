@@ -26,6 +26,7 @@
 #include "functions.h"
 #include "I2C.h"
 #include "MPU6050.h"
+#include "UART.h"
 /* Private macro */
 /* Private variables */
 /* Private function prototypes */
@@ -39,16 +40,25 @@ int main(void)
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
 
 
-	if( SYSTEM_ClockCheck() != RESET ){
+	if( SYSTEM_ClockCheck() != RESET )
+	{
 		vhLED_initGPIO();
+
 		vhADC_init();
+
 		vhI2C_initRCC();
 		vhI2C_initGPIO();
 		vhI2C_initI2C1();
 
+		vhUART_initNaviRCC();
+		vhUART_initNaviGPIO();
+		vhUART_initNaviUART2();
+
 		vStartLEDTasks(tskLED_FLASH_PRIORITY);
 		vStartADC_VoltPwrTask(tskADC_TASK_PRIORITY);
 		vStartI2C_MPU6050Task(tskI2C_MPU6050_PRIORITY);
+		vStartUART_NAVITask(tskUART_NAVI_PRIORITY);
+
 		vTaskStartScheduler();
 	}
 }

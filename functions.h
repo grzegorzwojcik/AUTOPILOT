@@ -20,11 +20,14 @@
 			/* 		Task priorities.		 */
 #define tskLED_FLASH_PRIORITY					( tskIDLE_PRIORITY )
 #define tskADC_TASK_PRIORITY					( tskIDLE_PRIORITY + 1 )
+#define tskUART_NAVI_PRIORITY					( tskIDLE_PRIORITY + 2 )
 #define tskI2C_MPU6050_PRIORITY					( tskIDLE_PRIORITY + 3 )
 
 			/* 			Semaphores.			 */
 SemaphoreHandle_t xSemaphoreADC_VoltPwr;
 SemaphoreHandle_t xSemaphoreI2C_MPU6050;
+SemaphoreHandle_t xSemaphoreUART_NAVITX;
+SemaphoreHandle_t xSemaphoreUART_NAVIRX;
 /*===========================================================*/
 
 /* Private define ------------------------------------------------------------*/
