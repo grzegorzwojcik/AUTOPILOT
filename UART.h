@@ -10,6 +10,7 @@
 
 #include "functions.h"
 #include "stm32f4xx.h"
+#include "stddef.h"
 
 #include "FreeRTOS_Source/include/FreeRTOS.h"
 #include "FreeRTOS_Source/include/task.h"
@@ -35,8 +36,23 @@
 #define baudRateNAVI				115200
 #define NAVI_BUFFER_LENGTH			30
 #define NAVI_DF_CHAR				'#'				// Data frame starting character
-volatile unsigned char GV_bufforNAVIsend[BTM_BUFFOR_LENGTH];
-volatile unsigned char GV_bufforNAVIrec[BTM_BUFFOR_LENGTH];
+#define GPS_BUFFER_LENGTH			50
+#define GPS_DF_CHAR					'$'				// Data frame starting character
+volatile unsigned char GV_bufferNAVIsend[NAVI_BUFFER_LENGTH];
+volatile unsigned char GV_bufferNAVIrec[NAVI_BUFFER_LENGTH];
+volatile unsigned char GV_bufferGPSsend[GPS_BUFFER_LENGTH];
+volatile unsigned char GV_bufferGPSrec[GPS_BUFFER_LENGTH];
+
+
+/**
+ * Set parameters for clearing buffer function
+ */
+typedef enum {
+    UART_NaviBufferSEND 	= 0x00,
+    UART_NaviBufferRECEIVE 	= 0x01,
+    UART_GpsBufferSEND 		= 0x02,
+    UART_GpsBufferRECEIVE 	= 0x03
+} UARTbuffer_t;
 
 /* Hardware related functions. */
 void vhUART_initNaviRCC(void);
@@ -51,6 +67,7 @@ void vhUART_initGpsUART2(void);
 /* Software related functions. */
 uint8_t ucUART_calculateCRC(char *Word, char StartChar ,uint8_t Length);
 void vUART_puts(USART_TypeDef* USARTx, volatile char *s);
+void vUART_ClearBuffer(UARTbuffer_t	UART_buffer);
 
 /*			 Tasks 			*/
 void vTaskUART_NAVI(void * pvParameters);

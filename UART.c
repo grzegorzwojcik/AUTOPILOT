@@ -96,6 +96,40 @@ void vUART_puts(USART_TypeDef* USARTx, volatile char *s)
 
 
 
+/*-----------------------------------------------------------
+* @brief Function Name  : vUART_ClearBuffer
+* @brief Description    : Clears global (volatile) UART buffer, one of the selected by @param
+* @param UART_buffer	: one of the UARTbuffer_t typedef.
+*/
+void vUART_ClearBuffer(UARTbuffer_t	UART_buffer){
+	uint8_t tmp = 0;
+
+	switch (UART_buffer) {
+		case UART_NaviBufferRECEIVE:
+			for (tmp = 0; tmp < NAVI_BUFFER_LENGTH; tmp++)
+				GV_bufferNAVIrec[tmp] = 0;
+			break;
+
+		case UART_NaviBufferSEND:
+			for (tmp = 0; tmp < NAVI_BUFFER_LENGTH; tmp++)
+				GV_bufferNAVIsend[tmp] = 0;
+			break;
+
+		case UART_GpsBufferRECEIVE:
+			for (tmp = 0; tmp < GPS_BUFFER_LENGTH; tmp++)
+				GV_bufferGPSrec[tmp] = 0;
+			break;
+
+		case UART_GpsBufferSEND:
+			for (tmp = 0; tmp < GPS_BUFFER_LENGTH; tmp++)
+				GV_bufferGPSsend[tmp] = 0;
+			break;
+
+		default:
+			break;
+	}
+}
+
 /****				TASKS				****/
 void vTaskUART_NAVI(void * pvParameters)
 {
@@ -106,7 +140,10 @@ void vTaskUART_NAVI(void * pvParameters)
 	for(;;){
 		/*		 500ms delay.	 */
 		vTaskDelayUntil( &xLastFlashTime, 500 );
-		vUART_puts(USART2, "test\n\r");
+		vUART_ClearBuffer(UART_NaviBufferSEND);
+		sprintf(GV_bufferNAVIsend, "%c,8,%i,%i,%i,0,*CRC\n\r", NAVI_DF_CHAR, 22, 33, 44);
+		vUART_puts(USART2, GV_bufferNAVIsend);
+
 	}
 }
 
