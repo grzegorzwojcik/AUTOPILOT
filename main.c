@@ -36,8 +36,8 @@
 int main(void)
 {
 	/* TODO - Add your application code here */
-
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
+
 
 	if( SYSTEM_ClockCheck() != RESET ){
 		vhLED_initGPIO();
