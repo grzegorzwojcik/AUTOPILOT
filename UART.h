@@ -39,10 +39,10 @@
 #define NAVI_DF_CHAR				'#'				// Data frame starting character
 #define GPS_BUFFER_LENGTH			50
 #define GPS_DF_CHAR					'$'				// Data frame starting character
-volatile unsigned char GV_bufferNAVIsend[NAVI_BUFFER_LENGTH];
-volatile unsigned char GV_bufferNAVIrec[NAVI_BUFFER_LENGTH];
-volatile unsigned char GV_bufferGPSsend[GPS_BUFFER_LENGTH];
-volatile unsigned char GV_bufferGPSrec[GPS_BUFFER_LENGTH];
+volatile char GV_bufferNAVIsend[NAVI_BUFFER_LENGTH];
+volatile char GV_bufferNAVIrec[NAVI_BUFFER_LENGTH];
+volatile char GV_bufferGPSsend[GPS_BUFFER_LENGTH];
+volatile char GV_bufferGPSrec[GPS_BUFFER_LENGTH];
 
 
 /**
