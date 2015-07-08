@@ -145,16 +145,21 @@ void vTaskUART_NAVI(void * pvParameters)
 	MPU6050_t MPU6050_Structure = tMPU6050_initStruct(&MPU6050_Structure);
 
 	for(;;){
-		/*		 500ms delay.	 */
-		vTaskDelayUntil( &xLastFlashTime, 500 );
+		/*		 250ms delay.	 */
+		vTaskDelayUntil( &xLastFlashTime, 250 );
 		xQueueReceive(xQueueUART_2xMPU_t, &MPU6050_Structure, 100);
 		xSemaphoreGive(xSemaphoreUART_NAVITX);
 
 		vUART_ClearBuffer(UART_NaviBufferSEND);
-		sprintf(GV_bufferNAVIsend, "%c,8,%i,%i,%i,0,*CRC\n\r", NAVI_DF_CHAR,
+		char tmp_buffer[NAVI_BUFFER_LENGTH] = {0};
+		/* Collecting temporary string */
+		sprintf(tmp_buffer, "%c,8,%i,%i,%i,0,*", NAVI_DF_CHAR,
 				MPU6050_Structure.Gyroscope_X,
 				MPU6050_Structure.Gyroscope_Y,
 				MPU6050_Structure.Gyroscope_Z);
+		/* Adding calculated CRC to this string */
+		sprintf(GV_bufferNAVIsend, "%s%i\n\r", tmp_buffer,
+				ucUART_calculateCRC(tmp_buffer, NAVI_DF_CHAR, NAVI_BUFFER_LENGTH) );
 		vUART_puts(USART2, GV_bufferNAVIsend);
 	}
 }

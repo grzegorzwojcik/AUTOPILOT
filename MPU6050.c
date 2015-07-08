@@ -142,6 +142,7 @@ void vTaskI2C_MPU6050(void * pvParameters)
 
 	for(;;)
 	{
+		/* Read and store data to the MPU6050_Struct via I2C function */
 		tMPU6050_ReadAll(&MPU6050_Struct);
 		if( xSemaphoreTake(xSemaphoreUART_NAVITX, 100))
 		{

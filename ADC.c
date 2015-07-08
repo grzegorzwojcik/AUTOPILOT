@@ -218,8 +218,7 @@ void TIM1_CC_IRQHandler(void)
 	if( TIM_GetITStatus(TIM1, TIM_IT_CC1) != RESET )
 	{
 		TIM_ClearITPendingBit(TIM1, TIM_IT_CC1);
-		xSemaphoreGiveFromISR( 	xSemaphoreADC_VoltPwr,
-								NULL );
+		xSemaphoreGiveFromISR( 	xSemaphoreADC_VoltPwr, NULL );
 		ADC_SoftwareStartConv(ADC1);
 	}
 }

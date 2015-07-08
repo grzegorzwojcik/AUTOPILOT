@@ -39,7 +39,7 @@ int main(void)
 	/* TODO - Add your application code here */
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
 
-
+	/* Check if system clock frequency is 168 MHz */
 	if( SYSTEM_ClockCheck() != RESET )
 	{
 		vhLED_initGPIO();
@@ -58,7 +58,6 @@ int main(void)
 		vStartADC_VoltPwrTask(tskADC_TASK_PRIORITY);
 		vStartUART_NAVITask(tskUART_NAVI_PRIORITY);
 		vStartI2C_MPU6050Task(tskI2C_MPU6050_PRIORITY);
-
 
 		vTaskStartScheduler();
 	}
