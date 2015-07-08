@@ -160,7 +160,16 @@ void vTaskUART_NAVI(void * pvParameters)
 		/* Adding calculated CRC to this string */
 		sprintf(GV_bufferNAVIsend, "%s%i\n\r", tmp_buffer,
 				ucUART_calculateCRC(tmp_buffer, NAVI_DF_CHAR, NAVI_BUFFER_LENGTH) );
+		sprintf(GV_bufferNAVIsend, "%i %i %i \n\r",
+				MPU6050_Structure.Gyroscope_X,
+				MPU6050_Structure.Gyroscope_Y,
+				MPU6050_Structure.Gyroscope_Z);
 		vUART_puts(USART2, GV_bufferNAVIsend);
+
+		/*sprintf(GV_bufferNAVIsend,"{GyroX, T, %i}{GyroY, T, %i}",
+				MPU6050_Structure.Gyroscope_X,
+				MPU6050_Structure.Gyroscope_Y);
+		vUART_puts(USART2, GV_bufferNAVIsend);*/
 	}
 }
 
