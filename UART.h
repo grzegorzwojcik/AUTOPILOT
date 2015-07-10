@@ -8,9 +8,11 @@
 #ifndef UART_H_
 #define UART_H_
 
-#include "functions.h"
 #include "stm32f4xx.h"
 #include "stddef.h"
+
+#include "functions.h"
+#include "FUSION.h"
 #include "MPU6050.h"
 
 #include "FreeRTOS_Source/include/FreeRTOS.h"

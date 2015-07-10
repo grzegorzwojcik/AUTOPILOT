@@ -42,14 +42,14 @@ MPU6050_Result_t tMPU6050_ReadAll(MPU6050_t* DataStruct) {
 	DataStruct->Temperature = (float)((float)((int16_t)temp) / (float)340.0 + (float)36.53);
 
 	/* Format gyroscope data [RAW]*/
-	//DataStruct->Gyroscope_X = (int16_t)(data[8] << 8 | data[9]);
-	//DataStruct->Gyroscope_Y = (int16_t)(data[10] << 8 | data[11]);
-	//DataStruct->Gyroscope_Z = (int16_t)(data[12] << 8 | data[13]);
+	DataStruct->Gyroscope_X = (int16_t)(data[8] << 8 | data[9]);
+	DataStruct->Gyroscope_Y = (int16_t)(data[10] << 8 | data[11]);
+	DataStruct->Gyroscope_Z = (int16_t)(data[12] << 8 | data[13]);
 
 	/* Format gyroscope data [DEGREES °]*/
-	DataStruct->Gyroscope_X = (int16_t)(data[8] << 8 | data[9])		* DataStruct->Gyro_Mult;
-	DataStruct->Gyroscope_Y = (int16_t)(data[10] << 8 | data[11])	* DataStruct->Gyro_Mult;
-	DataStruct->Gyroscope_Z = (int16_t)(data[12] << 8 | data[13])	* DataStruct->Gyro_Mult;
+	//DataStruct->Gyroscope_X = (int16_t)(data[8] << 8 | data[9])		* DataStruct->Gyro_Mult;
+	//DataStruct->Gyroscope_Y = (int16_t)(data[10] << 8 | data[11])	* DataStruct->Gyro_Mult;
+	//DataStruct->Gyroscope_Z = (int16_t)(data[12] << 8 | data[13])	* DataStruct->Gyro_Mult;
 
 	/* Return OK */
 	return TM_MPU6050_Result_Ok;
@@ -144,6 +144,13 @@ void vTaskI2C_MPU6050(void * pvParameters)
 	{
 		/* Read and store data to the MPU6050_Struct via I2C function */
 		tMPU6050_ReadAll(&MPU6050_Struct);
+
+		FUSION_filterUpdate(MPU6050_Struct.Gyroscope_X * 0.0174533,
+				MPU6050_Struct.Gyroscope_Y * 0.0174533,
+				MPU6050_Struct.Gyroscope_Z * 0.0174533,
+				MPU6050_Struct.Accelerometer_X * MPU6050_Struct.Acce_Mult,
+				MPU6050_Struct.Accelerometer_Y * MPU6050_Struct.Acce_Mult,
+				MPU6050_Struct.Accelerometer_Z * MPU6050_Struct.Acce_Mult);
 		if( xSemaphoreTake(xSemaphoreUART_NAVITX, 100))
 		{
 			xQueueSend(xQueueUART_2xMPU_t, &MPU6050_Struct, 100);

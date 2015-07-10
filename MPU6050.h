@@ -10,7 +10,9 @@
 
 #include <stddef.h>
 #include "stm32f4xx.h"
+
 #include "functions.h"
+#include "FUSION.h"
 #include "I2C.h"
 
 #include "FreeRTOS_Source/include/FreeRTOS.h"

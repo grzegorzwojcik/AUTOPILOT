@@ -24,6 +24,7 @@
 
 #include "ADC.h"
 #include "functions.h"
+#include "FUSION.h"
 #include "I2C.h"
 #include "MPU6050.h"
 #include "UART.h"

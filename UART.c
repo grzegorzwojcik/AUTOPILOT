@@ -143,6 +143,7 @@ void vTaskUART_NAVI(void * pvParameters)
 	portTickType xLastFlashTime;
 	xLastFlashTime = xTaskGetTickCount();
 	MPU6050_t MPU6050_Structure = tMPU6050_initStruct(&MPU6050_Structure);
+	SEq_1 = 1; SEq_2 = 0; SEq_3 = 0; SEq_4 = 0;
 
 	for(;;){
 		/*		 250ms delay.	 */
@@ -170,6 +171,18 @@ void vTaskUART_NAVI(void * pvParameters)
 				MPU6050_Structure.Gyroscope_X,
 				MPU6050_Structure.Gyroscope_Y);
 		vUART_puts(USART2, GV_bufferNAVIsend);*/
+		static float pitch = 0;
+		static float yaw = 0;
+		static float roll = 0;
+
+
+		yaw   = atan2(2.0f * (SEq_2 * SEq_3 + SEq_1 * SEq_4), SEq_1 * SEq_1 + SEq_2 * SEq_2 - SEq_3 * SEq_3 - SEq_4 * SEq_4);
+		pitch = -asin(2.0f * (SEq_2 * SEq_4 - SEq_1 * SEq_3));
+		roll  = atan2(2.0f * (SEq_1 * SEq_2 + SEq_3 * SEq_4), SEq_1 * SEq_1 - SEq_2 * SEq_2 - SEq_3 * SEq_3 + SEq_4 * SEq_4);
+		pitch *= 57.295;	// * PI/180
+		yaw   *= 57.295;	// * PI/180
+		roll  *= 57.295;	// * PI/180
+
 	}
 }
 
