@@ -15,14 +15,9 @@
 #include "I2C.h"
 #include <math.h>
 
-#include "FreeRTOS_Source/include/FreeRTOS.h"
-#include "FreeRTOS_Source/include/task.h"
-#include "FreeRTOS_Source/include/semphr.h"
-
 			/*  System constants. */
 /*Sampling period in seconds (shown as 1 ms)*/
 #define deltat 0.001f
-
 /*Gyroscope measurement error in rad/s (shown as 5 deg/s)*/
 #define gyroMeasError 3.14159265358979f * (5.0f / 180.0f)
 

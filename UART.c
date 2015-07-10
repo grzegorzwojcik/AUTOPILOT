@@ -175,10 +175,18 @@ void vTaskUART_NAVI(void * pvParameters)
 		static float yaw = 0;
 		static float roll = 0;
 
-
+/*
 		yaw   = atan2(2.0f * (SEq_2 * SEq_3 + SEq_1 * SEq_4), SEq_1 * SEq_1 + SEq_2 * SEq_2 - SEq_3 * SEq_3 - SEq_4 * SEq_4);
 		pitch = -asin(2.0f * (SEq_2 * SEq_4 - SEq_1 * SEq_3));
 		roll  = atan2(2.0f * (SEq_1 * SEq_2 + SEq_3 * SEq_4), SEq_1 * SEq_1 - SEq_2 * SEq_2 - SEq_3 * SEq_3 + SEq_4 * SEq_4);
+*/
+
+
+		yaw 	= atan2f(2 * SEq_2 * SEq_3 - 2 * SEq_1 * SEq_4 , 2 * SEq_1 * SEq_1 + 2 * SEq_2 * SEq_2 - 1 );
+		roll 	= -asinf( 2 * SEq_2 * SEq_4 + 2 * SEq_1 * SEq_3 );
+		pitch 	= atan2f(2 * SEq_3 * SEq_4 - 2 * SEq_1 * SEq_2 , 2 * SEq_1 * SEq_1 + 2 * SEq_4 * SEq_4 - 1 );
+
+
 		pitch *= 57.295;	// * PI/180
 		yaw   *= 57.295;	// * PI/180
 		roll  *= 57.295;	// * PI/180
