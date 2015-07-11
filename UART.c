@@ -143,29 +143,37 @@ void vTaskUART_NAVI(void * pvParameters)
 	portTickType xLastFlashTime;
 	xLastFlashTime = xTaskGetTickCount();
 	MPU6050_t MPU6050_Structure = tMPU6050_initStruct(&MPU6050_Structure);
-	SEq_1 = 1; SEq_2 = 0; SEq_3 = 0; SEq_4 = 0;
 
 	for(;;){
 		/*		 250ms delay.	 */
-		vTaskDelayUntil( &xLastFlashTime, 250 );
+		vTaskDelayUntil( &xLastFlashTime, 50 );
 		xQueueReceive(xQueueUART_2xMPU_t, &MPU6050_Structure, 100);
 		xSemaphoreGive(xSemaphoreUART_NAVITX);
 
 		vUART_ClearBuffer(UART_NaviBufferSEND);
 		char tmp_buffer[NAVI_BUFFER_LENGTH] = {0};
 		/* Collecting temporary string */
-		sprintf(tmp_buffer, "%c,8,%i,%i,%i,0,*", NAVI_DF_CHAR,
+		/*sprintf(tmp_buffer, "%c,8,%i,%i,%i,0,*", NAVI_DF_CHAR,
 				MPU6050_Structure.Gyroscope_X,
 				MPU6050_Structure.Gyroscope_Y,
 				MPU6050_Structure.Gyroscope_Z);
-		/* Adding calculated CRC to this string */
+		 Adding calculated CRC to this string
 		sprintf(GV_bufferNAVIsend, "%s%i\n\r", tmp_buffer,
-				ucUART_calculateCRC(tmp_buffer, NAVI_DF_CHAR, NAVI_BUFFER_LENGTH) );
+				ucUART_calculateCRC(tmp_buffer, NAVI_DF_CHAR, NAVI_BUFFER_LENGTH) );*/
+
+		//MAKER PLOT FRAME
 		/*sprintf(GV_bufferNAVIsend, "%i %i %i \n\r",
 				MPU6050_Structure.Gyroscope_X,
 				MPU6050_Structure.Gyroscope_Y,
 				MPU6050_Structure.Gyroscope_Z);*/
+
+		sprintf(GV_bufferNAVIsend, "a%i\nb%i\nc%i\nd%i\n",
+				MPU6050_Structure.Gyroscope_Y,
+				(int)MPU6050_Structure.Gy,
+				MPU6050_Structure.Gyroscope_Z,
+				(int)MPU6050_Structure.Gz);
 		vUART_puts(USART2, GV_bufferNAVIsend);
+
 
 		/*sprintf(GV_bufferNAVIsend,"{GyroX, T, %i}{GyroY, T, %i}",
 				MPU6050_Structure.Gyroscope_X,

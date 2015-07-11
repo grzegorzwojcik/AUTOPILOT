@@ -20,6 +20,9 @@ MPU6050_t tMPU6050_initStruct(MPU6050_t* MPU6050_Struct)
 	MPU6050_Struct->Gyroscope_Y		=	0;
 	MPU6050_Struct->Gyroscope_Z		=	0;
 	MPU6050_Struct->Temperature		=	0;
+	MPU6050_Struct->Gx				=	0;
+	MPU6050_Struct->Gy				=	0;
+	MPU6050_Struct->Gz				=	0;
 
 	return *MPU6050_Struct;
 }
@@ -50,7 +53,9 @@ MPU6050_Result_t tMPU6050_ReadAll(MPU6050_t* DataStruct) {
 	//DataStruct->Gyroscope_X = (int16_t)(data[8] << 8 | data[9])		* DataStruct->Gyro_Mult;
 	//DataStruct->Gyroscope_Y = (int16_t)(data[10] << 8 | data[11])	* DataStruct->Gyro_Mult;
 	//DataStruct->Gyroscope_Z = (int16_t)(data[12] << 8 | data[13])	* DataStruct->Gyro_Mult;
-
+	//DataStruct->Ax = DataStruct->Accelerometer_X * DataStruct->Acce_Mult;
+	//DataStruct->Ay = DataStruct->Accelerometer_Y * DataStruct->Acce_Mult;
+	//DataStruct->Az = DataStruct->Accelerometer_Z * DataStruct->Acce_Mult;
 	/* Return OK */
 	return TM_MPU6050_Result_Ok;
 }
@@ -135,22 +140,44 @@ void vTaskI2C_MPU6050(void * pvParameters)
 	xLastFlashTime = xTaskGetTickCount();
 	MPU6050_Struct = tMPU6050_initStruct(&MPU6050_Struct);
 
+	SEq_1 = 1.0f; SEq_2 = 0.0f; SEq_3 = 0.0f; SEq_4 = 0.0f;
 	thMPU6050_Init(&MPU6050_Struct,
 			TM_MPU6050_Device_1,
 			TM_MPU6050_Accelerometer_2G,
 			TM_MPU6050_Gyroscope_250s);
 
+	static uint16_t tmp = 0;
+	static int offsetX = 0;
+	static int offsetY = 0;
+	static int offsetZ = 0;
+	for( tmp; tmp < 1000; tmp++)
+	{
+		tMPU6050_ReadAll(&MPU6050_Struct);
+		offsetX += MPU6050_Struct.Gyroscope_X;
+		offsetY += MPU6050_Struct.Gyroscope_Y;
+		offsetZ += MPU6050_Struct.Gyroscope_Z;
+		vTaskDelayUntil(&xLastFlashTime, 1 );
+
+		if( tmp >= 999 )
+		{
+			offsetX /= 1000;
+			offsetY /= 1000;
+			offsetZ /= 1000;
+		}
+	}
+
+
+
+
 	for(;;)
 	{
 		/* Read and store data to the MPU6050_Struct via I2C function */
 		tMPU6050_ReadAll(&MPU6050_Struct);
-
-		FUSION_filterUpdate(MPU6050_Struct.Gyroscope_X * MPU6050_Struct.Gyro_Mult * 0.0174533,
-				MPU6050_Struct.Gyroscope_Y * MPU6050_Struct.Gyro_Mult * 0.0174533,
-				MPU6050_Struct.Gyroscope_Z * MPU6050_Struct.Gyro_Mult * 0.0174533,
-				MPU6050_Struct.Accelerometer_X * MPU6050_Struct.Acce_Mult,
-				MPU6050_Struct.Accelerometer_Y * MPU6050_Struct.Acce_Mult,
-				MPU6050_Struct.Accelerometer_Z * MPU6050_Struct.Acce_Mult);
+		MPU6050_Struct.Gx = ((MPU6050_Struct.Gyroscope_X - offsetX) * MPU6050_Struct.Gyro_Mult *M_PI)/180.0f;
+		MPU6050_Struct.Gy = ((MPU6050_Struct.Gyroscope_Y - offsetY) * MPU6050_Struct.Gyro_Mult *M_PI)/180.0f;
+		MPU6050_Struct.Gz = ((MPU6050_Struct.Gyroscope_Z - offsetZ) * MPU6050_Struct.Gyro_Mult *M_PI)/180.0f;
+		FUSION_filterUpdate(MPU6050_Struct.Gx, MPU6050_Struct.Gy, MPU6050_Struct.Gz,
+			MPU6050_Struct.Accelerometer_X, MPU6050_Struct.Accelerometer_Y, MPU6050_Struct.Accelerometer_Z);
 
 		if( xSemaphoreTake(xSemaphoreUART_NAVITX, 100))
 		{

@@ -168,6 +168,9 @@ typedef struct {
     int16_t Gyroscope_Y;
     int16_t Gyroscope_Z;
     float Temperature;
+    float Gx;
+    float Gy;
+    float Gz;
 } MPU6050_t;
 
 MPU6050_t tMPU6050_initStruct(MPU6050_t* MPU6050_Struct);
