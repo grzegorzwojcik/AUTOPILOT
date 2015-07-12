@@ -180,10 +180,11 @@ MPU6050_t tMPU6050_initStruct(MPU6050_t* MPU6050_Struct);
 MPU6050_Result_t tMPU6050_ReadAll(MPU6050_t* DataStruct);
 MPU6050_Result_t thMPU6050_Init(MPU6050_t* DataStruct, MPU6050_Device_t DeviceNumber,
 		MPU6050_Accelerometer_t AccelerometerSensitivity, MPU6050_Gyroscope_t GyroscopeSensitivity);
-
+void vMPU6050_GyroCalibration(MPU6050_t* DataStruct, uint16_t Period_MS);
 
 /*			 Tasks 			*/
 void vTaskI2C_MPU6050(void * pvParameters);
 void vStartI2C_MPU6050Task(unsigned portBASE_TYPE uxPriority);
+
 
 #endif /* MPU6050_H_ */

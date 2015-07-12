@@ -8,6 +8,7 @@
 #include "MPU6050.h"
 
 #define	DEG2RAD				0.017453f				// equals PI/180
+#define	RAD2DEG				57.29577f				// equals 180/PI
 
 MPU6050_t tMPU6050_initStruct(MPU6050_t* MPU6050_Struct)
 {
@@ -136,6 +137,39 @@ MPU6050_Result_t thMPU6050_Init(MPU6050_t* DataStruct, MPU6050_Device_t DeviceNu
 }
 
 
+void vMPU6050_GyroCalibration(MPU6050_t* DataStruct, uint16_t Period_MS)
+{
+	/* Gyroscope calibration  */
+	static uint16_t tmp = 0;
+	static int tmp_OffsetX = 0;
+	static int tmp_OffsetY = 0;
+	static int tmp_OffsetZ = 0;
+
+	portTickType xLastFlashTime;
+	xLastFlashTime = xTaskGetTickCount();
+
+	for( tmp; tmp < Period_MS; tmp++)
+	{
+		tMPU6050_ReadAll(DataStruct);
+		tmp_OffsetX += DataStruct->Gyroscope_X;
+		tmp_OffsetY += DataStruct->Gyroscope_Y;
+		tmp_OffsetZ += DataStruct->Gyroscope_Z;
+		vTaskDelayUntil(&xLastFlashTime, 1 );
+
+		if( tmp >= Period_MS - 1 )
+		{
+			tmp_OffsetX /= Period_MS;
+			tmp_OffsetY /= Period_MS;
+			tmp_OffsetZ /= Period_MS;
+
+			DataStruct->GyroOffsetX = tmp_OffsetX;
+			DataStruct->GyroOffsetY = tmp_OffsetY;
+			DataStruct->GyroOffsetZ = tmp_OffsetZ;
+		}
+	}
+}
+
+
 /****				TASKS				****/
 void vTaskI2C_MPU6050(void * pvParameters)
 {
@@ -154,31 +188,8 @@ void vTaskI2C_MPU6050(void * pvParameters)
 			TM_MPU6050_Accelerometer_2G,
 			TM_MPU6050_Gyroscope_250s);
 
-	/* Gyroscope calibration  */
-	static uint16_t tmp = 0;
-	static int tmp_OffsetX = 0;
-	static int tmp_OffsetY = 0;
-	static int tmp_OffsetZ = 0;
-
-	for( tmp; tmp < 1000; tmp++)
-	{
-		tMPU6050_ReadAll(&MPU6050_Struct);
-		tmp_OffsetX += MPU6050_Struct.Gyroscope_X;
-		tmp_OffsetY += MPU6050_Struct.Gyroscope_Y;
-		tmp_OffsetZ += MPU6050_Struct.Gyroscope_Z;
-		vTaskDelayUntil(&xLastFlashTime, 1 );
-
-		if( tmp >= 999 )
-		{
-			tmp_OffsetX /= 1000;
-			tmp_OffsetY /= 1000;
-			tmp_OffsetZ /= 1000;
-
-			MPU6050_Struct.GyroOffsetX = tmp_OffsetX;
-			MPU6050_Struct.GyroOffsetY = tmp_OffsetY;
-			MPU6050_Struct.GyroOffsetZ = tmp_OffsetZ;
-		}
-	}
+	/* GyroCalibration: setting gyroscope offset values */
+	vMPU6050_GyroCalibration(&MPU6050_Struct, 2000);
 
 	for(;;)
 	{
