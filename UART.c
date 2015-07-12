@@ -146,8 +146,8 @@ void vTaskUART_NAVI(void * pvParameters)
 
 	for(;;){
 		/*		 250ms delay.	 */
-		vTaskDelayUntil( &xLastFlashTime, 50 );
-		xQueueReceive(xQueueUART_2xMPU_t, &MPU6050_Structure, 100);
+		vTaskDelayUntil( &xLastFlashTime, 20 );
+		xQueueReceive(xQueueUART_2xMPU_t, &MPU6050_Structure, 0);
 		xSemaphoreGive(xSemaphoreUART_NAVITX);
 
 		vUART_ClearBuffer(UART_NaviBufferSEND);
@@ -160,18 +160,19 @@ void vTaskUART_NAVI(void * pvParameters)
 		 Adding calculated CRC to this string
 		sprintf(GV_bufferNAVIsend, "%s%i\n\r", tmp_buffer,
 				ucUART_calculateCRC(tmp_buffer, NAVI_DF_CHAR, NAVI_BUFFER_LENGTH) );*/
-
+		static float pitch = 0;
+		static float yaw = 0;
+		static float roll = 0;
 		//MAKER PLOT FRAME
 		/*sprintf(GV_bufferNAVIsend, "%i %i %i \n\r",
 				MPU6050_Structure.Gyroscope_X,
 				MPU6050_Structure.Gyroscope_Y,
 				MPU6050_Structure.Gyroscope_Z);*/
 
-		sprintf(GV_bufferNAVIsend, "a%i\nb%i\nc%i\nd%i\n",
-				MPU6050_Structure.Gyroscope_Y,
-				(int)MPU6050_Structure.Gy,
-				MPU6050_Structure.Gyroscope_Z,
-				(int)MPU6050_Structure.Gz);
+		sprintf(GV_bufferNAVIsend, "a%i\nb%i\nc%i\n",
+				(int) yaw,
+				(int) pitch,
+				(int) roll);
 		vUART_puts(USART2, GV_bufferNAVIsend);
 
 
@@ -179,25 +180,22 @@ void vTaskUART_NAVI(void * pvParameters)
 				MPU6050_Structure.Gyroscope_X,
 				MPU6050_Structure.Gyroscope_Y);
 		vUART_puts(USART2, GV_bufferNAVIsend);*/
-		static float pitch = 0;
-		static float yaw = 0;
-		static float roll = 0;
+		float gx, gy, gz; // estimated gravity direction
 
-/*
-		yaw   = atan2(2.0f * (SEq_2 * SEq_3 + SEq_1 * SEq_4), SEq_1 * SEq_1 + SEq_2 * SEq_2 - SEq_3 * SEq_3 - SEq_4 * SEq_4);
-		pitch = -asin(2.0f * (SEq_2 * SEq_4 - SEq_1 * SEq_3));
-		roll  = atan2(2.0f * (SEq_1 * SEq_2 + SEq_3 * SEq_4), SEq_1 * SEq_1 - SEq_2 * SEq_2 - SEq_3 * SEq_3 + SEq_4 * SEq_4);
-*/
-
-
-		yaw 	= atan2f(2 * SEq_2 * SEq_3 - 2 * SEq_1 * SEq_4 , 2 * SEq_1 * SEq_1 + 2 * SEq_2 * SEq_2 - 1 );
-		roll 	= -asinf( 2 * SEq_2 * SEq_4 + 2 * SEq_1 * SEq_3 );
-		pitch 	= atan2f(2 * SEq_3 * SEq_4 - 2 * SEq_1 * SEq_2 , 2 * SEq_1 * SEq_1 + 2 * SEq_4 * SEq_4 - 1 );
-
-
-		pitch *= 57.295;	// * PI/180
+		/*yaw 	= atan2f(2 * q1 * q2 - 2 * q0 * q3 , 2 * q0 * q0 + 2 * q1 * q1 - 1 );
+		roll 	= -asinf( 2 * q1 * q3 + 2 * q0 * q2 );
+		pitch 	= atan2f(2 * q2 * q3 - 2 * q0 * q1 , 2 * q0 * q0 + 2 * q3 * q3 - 1 );*/
+		/*pitch *= 57.295;	// * PI/180
 		yaw   *= 57.295;	// * PI/180
-		roll  *= 57.295;	// * PI/180
+		roll  *= 57.295;	// * PI/180*/
+
+	    gx = 2 * (q1*q3 - q0*q2);
+	    gy = 2 * (q0*q1 + q2*q3);
+	    gz = q0*q0 - q1*q1 - q2*q2 + q3*q3;
+
+	    yaw = atan2(2 * q1 * q2 - 2 * q0 * q3, 2 * q0*q0 + 2 * q1 * q1 - 1) * 180/M_PI;
+	    pitch = atan(gx / sqrt(gy*gy + gz*gz))  * 180/M_PI;
+	    roll = atan(gy / sqrt(gx*gx + gz*gz))  * 180/M_PI;
 
 	}
 }

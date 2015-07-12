@@ -140,7 +140,7 @@ void vTaskI2C_MPU6050(void * pvParameters)
 	xLastFlashTime = xTaskGetTickCount();
 	MPU6050_Struct = tMPU6050_initStruct(&MPU6050_Struct);
 
-	SEq_1 = 1.0f; SEq_2 = 0.0f; SEq_3 = 0.0f; SEq_4 = 0.0f;
+	q0 = 1.0f; q1 = 0.0f; q2 = 0.0f; q3 = 0.0f;
 	thMPU6050_Init(&MPU6050_Struct,
 			TM_MPU6050_Device_1,
 			TM_MPU6050_Accelerometer_2G,
@@ -176,15 +176,18 @@ void vTaskI2C_MPU6050(void * pvParameters)
 		MPU6050_Struct.Gx = ((MPU6050_Struct.Gyroscope_X - offsetX) * MPU6050_Struct.Gyro_Mult *M_PI)/180.0f;
 		MPU6050_Struct.Gy = ((MPU6050_Struct.Gyroscope_Y - offsetY) * MPU6050_Struct.Gyro_Mult *M_PI)/180.0f;
 		MPU6050_Struct.Gz = ((MPU6050_Struct.Gyroscope_Z - offsetZ) * MPU6050_Struct.Gyro_Mult *M_PI)/180.0f;
-		FUSION_filterUpdate(MPU6050_Struct.Gx, MPU6050_Struct.Gy, MPU6050_Struct.Gz,
-			MPU6050_Struct.Accelerometer_X, MPU6050_Struct.Accelerometer_Y, MPU6050_Struct.Accelerometer_Z);
 
-		if( xSemaphoreTake(xSemaphoreUART_NAVITX, 100))
+		FUSION_filterUpdate(MPU6050_Struct.Gx, MPU6050_Struct.Gy, MPU6050_Struct.Gz,
+			MPU6050_Struct.Accelerometer_X,
+			MPU6050_Struct.Accelerometer_Y,
+			MPU6050_Struct.Accelerometer_Z);
+
+		if( xSemaphoreTake(xSemaphoreUART_NAVITX, 20))
 		{
-			xQueueSend(xQueueUART_2xMPU_t, &MPU6050_Struct, 100);
+			xQueueSend(xQueueUART_2xMPU_t, &MPU6050_Struct, 0);
 		}
 		/*		50 Hz loop / 20ms delay	*/
-		vTaskDelayUntil(&xLastFlashTime, 20 );
+		vTaskDelayUntil(&xLastFlashTime, 10 );
 	}
 }
 
