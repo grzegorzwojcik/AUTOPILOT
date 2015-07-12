@@ -5,9 +5,9 @@
  *      Author: Grzegorz WÓJCIK
  */
 
-#include "FUSION.h"
+#include "IMU.h"
 
-void FUSION_filterUpdate(float gx, float gy, float gz, float ax, float ay, float az)
+void vFUSION_filterUpdate(float gx, float gy, float gz, float ax, float ay, float az)
 {
 	float recipNorm;
 	float s0, s1, s2, s3;

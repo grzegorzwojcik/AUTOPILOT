@@ -12,7 +12,7 @@
 #include "stm32f4xx.h"
 
 #include "functions.h"
-#include "FUSION.h"
+#include "IMU.h"
 #include "I2C.h"
 
 #include "FreeRTOS_Source/include/FreeRTOS.h"
@@ -161,16 +161,19 @@ typedef struct {
     float Gyro_Mult;
     float Acce_Mult;
     /* Public */
-    int16_t Accelerometer_X;
-    int16_t Accelerometer_Y;
-    int16_t Accelerometer_Z;
-    int16_t Gyroscope_X;
-    int16_t Gyroscope_Y;
-    int16_t Gyroscope_Z;
-    float Temperature;
-    float Gx;
-    float Gy;
-    float Gz;
+    int16_t Accelerometer_X;		//Raw data
+    int16_t Accelerometer_Y;		//Raw data
+    int16_t Accelerometer_Z;		//Raw data
+    int16_t Gyroscope_X;			//Raw data
+    int16_t Gyroscope_Y;			//Raw data
+    int16_t Gyroscope_Z;			//Raw data
+    int16_t GyroOffsetX;			//Calculated offset
+    int16_t GyroOffsetY;			//Calculated offset
+    int16_t GyroOffsetZ;			//Calculated offset
+    float Temperature;				//°C
+    float Gx;						//Rad/s
+    float Gy;						//Rad/s
+    float Gz;						//Rad/s
 } MPU6050_t;
 
 MPU6050_t tMPU6050_initStruct(MPU6050_t* MPU6050_Struct);

@@ -7,6 +7,8 @@
 
 #include "MPU6050.h"
 
+#define	DEG2RAD				0.017453f				// equals PI/180
+
 MPU6050_t tMPU6050_initStruct(MPU6050_t* MPU6050_Struct)
 {
 	//MPU6050_t MPU6050_Struct;
@@ -20,6 +22,9 @@ MPU6050_t tMPU6050_initStruct(MPU6050_t* MPU6050_Struct)
 	MPU6050_Struct->Gyroscope_Y		=	0;
 	MPU6050_Struct->Gyroscope_Z		=	0;
 	MPU6050_Struct->Temperature		=	0;
+	MPU6050_Struct->GyroOffsetX		=	0;
+	MPU6050_Struct->GyroOffsetY		=	0;
+	MPU6050_Struct->GyroOffsetZ		=	0;
 	MPU6050_Struct->Gx				=	0;
 	MPU6050_Struct->Gy				=	0;
 	MPU6050_Struct->Gz				=	0;
@@ -44,18 +49,19 @@ MPU6050_Result_t tMPU6050_ReadAll(MPU6050_t* DataStruct) {
 	temp = (data[6] << 8 | data[7]);
 	DataStruct->Temperature = (float)((float)((int16_t)temp) / (float)340.0 + (float)36.53);
 
-	/* Format gyroscope data [RAW]*/
+	/* Format gyroscope data [RAW] */
 	DataStruct->Gyroscope_X = (int16_t)(data[8] << 8 | data[9]);
 	DataStruct->Gyroscope_Y = (int16_t)(data[10] << 8 | data[11]);
 	DataStruct->Gyroscope_Z = (int16_t)(data[12] << 8 | data[13]);
 
-	/* Format gyroscope data [DEGREES °]*/
-	//DataStruct->Gyroscope_X = (int16_t)(data[8] << 8 | data[9])		* DataStruct->Gyro_Mult;
-	//DataStruct->Gyroscope_Y = (int16_t)(data[10] << 8 | data[11])	* DataStruct->Gyro_Mult;
-	//DataStruct->Gyroscope_Z = (int16_t)(data[12] << 8 | data[13])	* DataStruct->Gyro_Mult;
-	//DataStruct->Ax = DataStruct->Accelerometer_X * DataStruct->Acce_Mult;
-	//DataStruct->Ay = DataStruct->Accelerometer_Y * DataStruct->Acce_Mult;
-	//DataStruct->Az = DataStruct->Accelerometer_Z * DataStruct->Acce_Mult;
+	/* Format gyroscope data [RAD/s] considering calculated OFFSET */
+
+	DataStruct->Gx = ((DataStruct->Gyroscope_X - DataStruct->GyroOffsetX)
+			* DataStruct->Gyro_Mult) * DEG2RAD;
+	DataStruct->Gy = ((DataStruct->Gyroscope_Y - DataStruct->GyroOffsetY)
+			* DataStruct->Gyro_Mult) * DEG2RAD;
+	DataStruct->Gz = ((DataStruct->Gyroscope_Z - DataStruct->GyroOffsetZ)
+			* DataStruct->Gyro_Mult) * DEG2RAD;
 	/* Return OK */
 	return TM_MPU6050_Result_Ok;
 }
@@ -140,44 +146,47 @@ void vTaskI2C_MPU6050(void * pvParameters)
 	xLastFlashTime = xTaskGetTickCount();
 	MPU6050_Struct = tMPU6050_initStruct(&MPU6050_Struct);
 
+	/* Initial quaternion values */
 	q0 = 1.0f; q1 = 0.0f; q2 = 0.0f; q3 = 0.0f;
+
 	thMPU6050_Init(&MPU6050_Struct,
 			TM_MPU6050_Device_1,
 			TM_MPU6050_Accelerometer_2G,
 			TM_MPU6050_Gyroscope_250s);
 
+	/* Gyroscope calibration  */
 	static uint16_t tmp = 0;
-	static int offsetX = 0;
-	static int offsetY = 0;
-	static int offsetZ = 0;
+	static int tmp_OffsetX = 0;
+	static int tmp_OffsetY = 0;
+	static int tmp_OffsetZ = 0;
+
 	for( tmp; tmp < 1000; tmp++)
 	{
 		tMPU6050_ReadAll(&MPU6050_Struct);
-		offsetX += MPU6050_Struct.Gyroscope_X;
-		offsetY += MPU6050_Struct.Gyroscope_Y;
-		offsetZ += MPU6050_Struct.Gyroscope_Z;
+		tmp_OffsetX += MPU6050_Struct.Gyroscope_X;
+		tmp_OffsetY += MPU6050_Struct.Gyroscope_Y;
+		tmp_OffsetZ += MPU6050_Struct.Gyroscope_Z;
 		vTaskDelayUntil(&xLastFlashTime, 1 );
 
 		if( tmp >= 999 )
 		{
-			offsetX /= 1000;
-			offsetY /= 1000;
-			offsetZ /= 1000;
+			tmp_OffsetX /= 1000;
+			tmp_OffsetY /= 1000;
+			tmp_OffsetZ /= 1000;
+
+			MPU6050_Struct.GyroOffsetX = tmp_OffsetX;
+			MPU6050_Struct.GyroOffsetY = tmp_OffsetY;
+			MPU6050_Struct.GyroOffsetZ = tmp_OffsetZ;
 		}
 	}
-
-
-
 
 	for(;;)
 	{
 		/* Read and store data to the MPU6050_Struct via I2C function */
 		tMPU6050_ReadAll(&MPU6050_Struct);
-		MPU6050_Struct.Gx = ((MPU6050_Struct.Gyroscope_X - offsetX) * MPU6050_Struct.Gyro_Mult *M_PI)/180.0f;
-		MPU6050_Struct.Gy = ((MPU6050_Struct.Gyroscope_Y - offsetY) * MPU6050_Struct.Gyro_Mult *M_PI)/180.0f;
-		MPU6050_Struct.Gz = ((MPU6050_Struct.Gyroscope_Z - offsetZ) * MPU6050_Struct.Gyro_Mult *M_PI)/180.0f;
 
-		FUSION_filterUpdate(MPU6050_Struct.Gx, MPU6050_Struct.Gy, MPU6050_Struct.Gz,
+		/* Madgwick filter, obtain quaternions and obtain Yaw Pitch & Roll angles */
+		vFUSION_filterUpdate(MPU6050_Struct.Gx, MPU6050_Struct.Gy, MPU6050_Struct.Gz,
 			MPU6050_Struct.Accelerometer_X,
 			MPU6050_Struct.Accelerometer_Y,
 			MPU6050_Struct.Accelerometer_Z);
@@ -186,7 +195,7 @@ void vTaskI2C_MPU6050(void * pvParameters)
 		{
 			xQueueSend(xQueueUART_2xMPU_t, &MPU6050_Struct, 0);
 		}
-		/*		50 Hz loop / 20ms delay	*/
+		/*		100 Hz loop / 10ms delay	*/
 		vTaskDelayUntil(&xLastFlashTime, 10 );
 	}
 }

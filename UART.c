@@ -137,6 +137,27 @@ void vUART_ClearBuffer(UARTbuffer_t	UART_buffer){
 * @brief Description    : This task is responsible for sending proper data frames to the
 * 							 NAVIGATION & FAULT INJECTION BOARD by managing a semaphore
 */
+
+//MAKER PLOT FRAME
+/*sprintf(GV_bufferNAVIsend, "%i %i %i \n\r",
+		MPU6050_Structure.Gyroscope_X,
+		MPU6050_Structure.Gyroscope_Y,
+		MPU6050_Structure.Gyroscope_Z);*/
+
+//QUADROPLOT2 FRAME
+/*sprintf(GV_bufferNAVIsend, "a%i\nb%i\nc%i\n",
+		(int) yaw,
+		(int) pitch,
+		(int) roll);*/
+
+//NAVIGATION BOARD FRAME
+/*sprintf(tmp_buffer, "%c,8,%i,%i,%i,0,*", NAVI_DF_CHAR,
+		MPU6050_Structure.Gyroscope_X,
+		MPU6050_Structure.Gyroscope_Y,
+		MPU6050_Structure.Gyroscope_Z);
+// Adding calculated CRC to this string
+sprintf(GV_bufferNAVIsend, "%s%i\n\r", tmp_buffer,
+		ucUART_calculateCRC(tmp_buffer, NAVI_DF_CHAR, NAVI_BUFFER_LENGTH) );*/
 void vTaskUART_NAVI(void * pvParameters)
 {
 	/* Local variables. */
@@ -146,48 +167,14 @@ void vTaskUART_NAVI(void * pvParameters)
 
 	for(;;){
 		/*		 250ms delay.	 */
-		vTaskDelayUntil( &xLastFlashTime, 20 );
+		vTaskDelayUntil( &xLastFlashTime, 10 );
 		xQueueReceive(xQueueUART_2xMPU_t, &MPU6050_Structure, 0);
 		xSemaphoreGive(xSemaphoreUART_NAVITX);
 
-		vUART_ClearBuffer(UART_NaviBufferSEND);
-		char tmp_buffer[NAVI_BUFFER_LENGTH] = {0};
-		/* Collecting temporary string */
-		/*sprintf(tmp_buffer, "%c,8,%i,%i,%i,0,*", NAVI_DF_CHAR,
-				MPU6050_Structure.Gyroscope_X,
-				MPU6050_Structure.Gyroscope_Y,
-				MPU6050_Structure.Gyroscope_Z);
-		 Adding calculated CRC to this string
-		sprintf(GV_bufferNAVIsend, "%s%i\n\r", tmp_buffer,
-				ucUART_calculateCRC(tmp_buffer, NAVI_DF_CHAR, NAVI_BUFFER_LENGTH) );*/
+		static float gx, gy, gz; // estimated gravity direction
 		static float pitch = 0;
 		static float yaw = 0;
 		static float roll = 0;
-		//MAKER PLOT FRAME
-		/*sprintf(GV_bufferNAVIsend, "%i %i %i \n\r",
-				MPU6050_Structure.Gyroscope_X,
-				MPU6050_Structure.Gyroscope_Y,
-				MPU6050_Structure.Gyroscope_Z);*/
-
-		sprintf(GV_bufferNAVIsend, "a%i\nb%i\nc%i\n",
-				(int) yaw,
-				(int) pitch,
-				(int) roll);
-		vUART_puts(USART2, GV_bufferNAVIsend);
-
-
-		/*sprintf(GV_bufferNAVIsend,"{GyroX, T, %i}{GyroY, T, %i}",
-				MPU6050_Structure.Gyroscope_X,
-				MPU6050_Structure.Gyroscope_Y);
-		vUART_puts(USART2, GV_bufferNAVIsend);*/
-		float gx, gy, gz; // estimated gravity direction
-
-		/*yaw 	= atan2f(2 * q1 * q2 - 2 * q0 * q3 , 2 * q0 * q0 + 2 * q1 * q1 - 1 );
-		roll 	= -asinf( 2 * q1 * q3 + 2 * q0 * q2 );
-		pitch 	= atan2f(2 * q2 * q3 - 2 * q0 * q1 , 2 * q0 * q0 + 2 * q3 * q3 - 1 );*/
-		/*pitch *= 57.295;	// * PI/180
-		yaw   *= 57.295;	// * PI/180
-		roll  *= 57.295;	// * PI/180*/
 
 	    gx = 2 * (q1*q3 - q0*q2);
 	    gy = 2 * (q0*q1 + q2*q3);
@@ -197,6 +184,14 @@ void vTaskUART_NAVI(void * pvParameters)
 	    pitch = atan(gx / sqrt(gy*gy + gz*gz))  * 180/M_PI;
 	    roll = atan(gy / sqrt(gx*gx + gz*gz))  * 180/M_PI;
 
+		vUART_ClearBuffer(UART_NaviBufferSEND);
+		//char tmp_buffer[NAVI_BUFFER_LENGTH] = {0};
+
+		sprintf(GV_bufferNAVIsend, "a%i\nb%i\nc%i\n",
+				(int) yaw,
+				(int) pitch,
+				(int) roll);
+		vUART_puts(USART2, GV_bufferNAVIsend);
 	}
 }
 
@@ -210,9 +205,8 @@ void vStartUART_NAVITask(unsigned portBASE_TYPE uxPriority)
 	xSemaphoreUART_NAVITX = NULL;
 	xSemaphoreUART_NAVITX = xSemaphoreCreateBinary();
 
-
 	/* Creating queue which is responsible for handling MPU6050_t typedef data */
-	xQueueUART_2xMPU_t = xQueueCreate(2, sizeof(MPU6050_t) );
+	xQueueUART_2xMPU_t = xQueueCreate(1, sizeof(MPU6050_t) );
 
 	/* Creating task  */
 	xTaskHandle xHandleTaskUART_NAVI;
