@@ -11,6 +11,12 @@
  */
 #include "IMU.h"
 
+/*-----------------------------------------------------------
+* @brief Function Name  : vIMU_filterUpdate
+* @brief Description    : This function obtains quaternion bases on gyroscope & accelerometer data
+* @param gx, gy, gz		: angular velocity [rad/s]
+* @param ax, ay, az		: linear acceleration [raw data from MPU6050!]
+*/
 void vIMU_filterUpdate(float gx, float gy, float gz, float ax, float ay, float az)
 {
 	float recipNorm;
@@ -98,13 +104,15 @@ void vIMU_initStruct(IMU_t* IMU_Struct)
 
 void vIMU_getAngles(IMU_t* DataStruct)
 {
-	static float gx, gy, gz; // estimated gravity direction
+	/* Estimated gravity direction. */
+	static float gx, gy, gz;
 
+	/* angles conversion based on Sebastian O.H. Madgwick report */
     gx = 2 * (q1*q3 - q0*q2);
     gy = 2 * (q0*q1 + q2*q3);
     gz = q0*q0 - q1*q1 - q2*q2 + q3*q3;
 
-    DataStruct->Yaw = atan2(2 * q1 * q2 - 2 * q0 * q3, 2 * q0*q0 + 2 * q1 * q1 - 1) * 180/M_PI;//RAD2DEG
-    DataStruct->Pitch = atan(gx / sqrt(gy*gy + gz*gz))  * 180/M_PI;
-    DataStruct->Roll = atan(gy / sqrt(gx*gx + gz*gz))  * 180/M_PI;
+    DataStruct->Yaw		= atan2(2 * q1 * q2 - 2 * q0 * q3, 2 * q0*q0 + 2 * q1 * q1 - 1) * RAD2DEG;
+    DataStruct->Pitch	= atan(gx / sqrt(gy*gy + gz*gz))  								* RAD2DEG;
+    DataStruct->Roll	= atan(gy / sqrt(gx*gx + gz*gz))  								* RAD2DEG;
 }

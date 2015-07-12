@@ -138,26 +138,26 @@ void vUART_ClearBuffer(UARTbuffer_t	UART_buffer){
 * 							 NAVIGATION & FAULT INJECTION BOARD by managing a semaphore
 */
 
-//MAKER PLOT FRAME
-/*sprintf(GV_bufferNAVIsend, "%i %i %i \n\r",
-		MPU6050_Structure.Gyroscope_X,
-		MPU6050_Structure.Gyroscope_Y,
-		MPU6050_Structure.Gyroscope_Z);*/
+	//MAKER PLOT FRAME
+	/*sprintf(GV_bufferNAVIsend, "%i %i %i \n\r",
+			MPU6050_Structure.Gyroscope_X,
+			MPU6050_Structure.Gyroscope_Y,
+			MPU6050_Structure.Gyroscope_Z);*/
 
-//QUADROPLOT2 FRAME
-/*sprintf(GV_bufferNAVIsend, "a%i\nb%i\nc%i\n",
-		(int) yaw,
-		(int) pitch,
-		(int) roll);*/
+	//QUADROPLOT2 FRAME
+	/*sprintf(GV_bufferNAVIsend, "a%i\nb%i\nc%i\n",
+			(int) yaw,
+			(int) pitch,
+			(int) roll);*/
 
-//NAVIGATION BOARD FRAME
-/*sprintf(tmp_buffer, "%c,8,%i,%i,%i,0,*", NAVI_DF_CHAR,
-		MPU6050_Structure.Gyroscope_X,
-		MPU6050_Structure.Gyroscope_Y,
-		MPU6050_Structure.Gyroscope_Z);
-// Adding calculated CRC to this string
-sprintf(GV_bufferNAVIsend, "%s%i\n\r", tmp_buffer,
-		ucUART_calculateCRC(tmp_buffer, NAVI_DF_CHAR, NAVI_BUFFER_LENGTH) );*/
+	//NAVIGATION BOARD FRAME
+	/*sprintf(tmp_buffer, "%c,8,%i,%i,%i,0,*", NAVI_DF_CHAR,
+			MPU6050_Structure.Gyroscope_X,
+			MPU6050_Structure.Gyroscope_Y,
+			MPU6050_Structure.Gyroscope_Z);
+	// Adding calculated CRC to this string
+	sprintf(GV_bufferNAVIsend, "%s%i\n\r", tmp_buffer,
+			ucUART_calculateCRC(tmp_buffer, NAVI_DF_CHAR, NAVI_BUFFER_LENGTH) );*/
 void vTaskUART_NAVI(void * pvParameters)
 {
 	/* Local variables. */
@@ -171,7 +171,7 @@ void vTaskUART_NAVI(void * pvParameters)
 	vIMU_initStruct(&IMU_Struct);
 
 	for(;;){
-		/*		 20ms delay [50 Hz].	 */
+		/*		 10ms delay [100 Hz].	 */
 		vTaskDelayUntil( &xLastFlashTime, 20 );
 		xQueueReceive(xQueueUART_1xIMU_t, &IMU_Struct, 0);
 		xSemaphoreGive(xSemaphoreUART_NAVITX);
