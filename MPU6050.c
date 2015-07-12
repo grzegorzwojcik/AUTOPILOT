@@ -7,10 +7,8 @@
 
 #include "MPU6050.h"
 
-#define	DEG2RAD				0.017453f				// equals PI/180
-#define	RAD2DEG				57.29577f				// equals 180/PI
 
-MPU6050_t tMPU6050_initStruct(MPU6050_t* MPU6050_Struct)
+void vMPU6050_initStruct(MPU6050_t* MPU6050_Struct)
 {
 	//MPU6050_t MPU6050_Struct;
 	MPU6050_Struct->Address = MPU6050_I2C_ADDR | TM_MPU6050_Device_1;
@@ -29,8 +27,6 @@ MPU6050_t tMPU6050_initStruct(MPU6050_t* MPU6050_Struct)
 	MPU6050_Struct->Gx				=	0;
 	MPU6050_Struct->Gy				=	0;
 	MPU6050_Struct->Gz				=	0;
-
-	return *MPU6050_Struct;
 }
 
 
@@ -175,14 +171,18 @@ void vTaskI2C_MPU6050(void * pvParameters)
 {
 	/* Local variables. */
 	portTickType xLastFlashTime;
-	MPU6050_t MPU6050_Struct;
-
 	xLastFlashTime = xTaskGetTickCount();
-	MPU6050_Struct = tMPU6050_initStruct(&MPU6050_Struct);
 
 	/* Initial quaternion values */
 	q0 = 1.0f; q1 = 0.0f; q2 = 0.0f; q3 = 0.0f;
 
+	IMU_t IMU_Struct;
+	vIMU_initStruct(&IMU_Struct);
+	vIMU_getAngles(&IMU_Struct);
+
+	/* MPU6050 initialization */
+	MPU6050_t MPU6050_Struct;
+	vMPU6050_initStruct(&MPU6050_Struct);
 	thMPU6050_Init(&MPU6050_Struct,
 			TM_MPU6050_Device_1,
 			TM_MPU6050_Accelerometer_2G,
@@ -197,14 +197,17 @@ void vTaskI2C_MPU6050(void * pvParameters)
 		tMPU6050_ReadAll(&MPU6050_Struct);
 
 		/* Madgwick filter, obtain quaternions and obtain Yaw Pitch & Roll angles */
-		vFUSION_filterUpdate(MPU6050_Struct.Gx, MPU6050_Struct.Gy, MPU6050_Struct.Gz,
+		vIMU_filterUpdate(MPU6050_Struct.Gx, MPU6050_Struct.Gy, MPU6050_Struct.Gz,
 			MPU6050_Struct.Accelerometer_X,
 			MPU6050_Struct.Accelerometer_Y,
 			MPU6050_Struct.Accelerometer_Z);
 
-		if( xSemaphoreTake(xSemaphoreUART_NAVITX, 20))
+		/* Calculate Aerospace sequence Euler angles */
+		vIMU_getAngles(&IMU_Struct);
+
+		if( xSemaphoreTake(xSemaphoreUART_NAVITX, 10))
 		{
-			xQueueSend(xQueueUART_2xMPU_t, &MPU6050_Struct, 0);
+			xQueueSend(xQueueUART_1xIMU_t, &IMU_Struct, 0);
 		}
 		/*		100 Hz loop / 10ms delay	*/
 		vTaskDelayUntil(&xLastFlashTime, 10 );

@@ -29,7 +29,8 @@ SemaphoreHandle_t xSemaphoreUART_NAVITX;
 SemaphoreHandle_t xSemaphoreUART_NAVIRX;
 
 			/* 			Queues.			 */
-QueueHandle_t xQueueUART_2xMPU_t;
+QueueHandle_t xQueueUART_1xMPU_t;
+QueueHandle_t xQueueUART_1xIMU_t;
 /*===========================================================*/
 
 /* Private define ------------------------------------------------------------*/

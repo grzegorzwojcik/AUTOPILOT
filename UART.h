@@ -12,7 +12,7 @@
 #include "stddef.h"
 
 #include "functions.h"
-#include "IMU.h".h"
+#include "IMU.h"
 #include "MPU6050.h"
 
 #include "FreeRTOS_Source/include/FreeRTOS.h"

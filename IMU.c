@@ -3,11 +3,15 @@
  *
  *  Created on: Jul 10, 2015
  *      Author: Grzegorz WÓJCIK
+ *
+ *      IMU data fusion is based on:
+ *      "An efficient orientation filter for inertial and intertial/magnetic sensor arrays"
+ *      by Sebastian O.H. Madgwick, using MPU6050 gyroscope & accelerometer sensor.
+ *
  */
-
 #include "IMU.h"
 
-void vFUSION_filterUpdate(float gx, float gy, float gz, float ax, float ay, float az)
+void vIMU_filterUpdate(float gx, float gy, float gz, float ax, float ay, float az)
 {
 	float recipNorm;
 	float s0, s1, s2, s3;
@@ -81,4 +85,26 @@ float invSqrt(float x)
    uint32_t i = 0x5F1F1412 - (*(uint32_t*)&x >> 1);
    float tmp = *(float*)&i;
    return tmp * (1.69000231f - 0.714158168f * x * tmp * tmp);
+}
+
+
+void vIMU_initStruct(IMU_t* IMU_Struct)
+{
+	IMU_Struct->Yaw 	= 0;
+	IMU_Struct->Pitch 	= 0;
+	IMU_Struct->Roll 	= 0;
+}
+
+
+void vIMU_getAngles(IMU_t* DataStruct)
+{
+	static float gx, gy, gz; // estimated gravity direction
+
+    gx = 2 * (q1*q3 - q0*q2);
+    gy = 2 * (q0*q1 + q2*q3);
+    gz = q0*q0 - q1*q1 - q2*q2 + q3*q3;
+
+    DataStruct->Yaw = atan2(2 * q1 * q2 - 2 * q0 * q3, 2 * q0*q0 + 2 * q1 * q1 - 1) * 180/M_PI;//RAD2DEG
+    DataStruct->Pitch = atan(gx / sqrt(gy*gy + gz*gz))  * 180/M_PI;
+    DataStruct->Roll = atan(gy / sqrt(gx*gx + gz*gz))  * 180/M_PI;
 }

@@ -28,10 +28,7 @@
 #include "I2C.h"
 #include "MPU6050.h"
 #include "UART.h"
-/* Private macro */
-/* Private variables */
-/* Private function prototypes */
-/* Private functions */
+
 
 
 /****					MAIN FUNCTION					***/
