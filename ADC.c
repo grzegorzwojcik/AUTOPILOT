@@ -184,6 +184,10 @@ void vTaskADC_VoltPwr(void * pvParameters)
 	/* Local variables. */
 	static uint32_t voltage = 0;
 	static uint16_t multiplier = 4400;
+	/*
+	 * ADC_CONVERTED_VALUES[0] is related to Power Supply voltage measurement
+	 * ADC_CONVERTED_VALUES[1] is related to IR Sensor voltage measurement
+	 */
 
 	for(;;){
 		if( xSemaphoreTake(xSemaphoreADC_VoltPwr, 100 ) == pdTRUE)

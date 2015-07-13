@@ -38,6 +38,7 @@ typedef struct {
 	int16_t Yaw;
 	int16_t Pitch;
 	int16_t Roll;
+	int16_t GyroZ;
 } IMU_t;
 
 /*-----------------------------------------------------------
@@ -48,7 +49,7 @@ typedef struct {
 * @param a_x, a_y, a_z	: accelerometer measurements
 */
 void vIMU_filterUpdate(float gx, float gy, float gz, float ax, float ay, float az);
-void vIMU_getAngles(IMU_t* DataStruct);
+void vIMU_getAngles(IMU_t* IMU_Struct, float GyroZ_RadPerS);
 void vIMU_initStruct(IMU_t* IMU_Struct);
 
 float invSqrt(float x);

@@ -99,10 +99,17 @@ void vIMU_initStruct(IMU_t* IMU_Struct)
 	IMU_Struct->Yaw 	= 0;
 	IMU_Struct->Pitch 	= 0;
 	IMU_Struct->Roll 	= 0;
+	IMU_Struct->GyroZ	= 0;
 }
 
 
-void vIMU_getAngles(IMU_t* DataStruct)
+/*-----------------------------------------------------------
+* @brief Function Name  : vIMU_getAngles
+* @brief Description    : This function updates IMU_Struct variables.
+* @param *IMU_Struct	: pointer to a structure of IMU_t typedef
+* @param GyroZ_RadPerS	: gyroscope Z angular velocity in [rad/s]
+*/
+void vIMU_getAngles(IMU_t* IMU_Struct, float GyroZ_RadPerS)
 {
 	/* Estimated gravity direction. */
 	static float gx, gy, gz;
@@ -112,7 +119,8 @@ void vIMU_getAngles(IMU_t* DataStruct)
     gy = 2 * (q0*q1 + q2*q3);
     gz = q0*q0 - q1*q1 - q2*q2 + q3*q3;
 
-    DataStruct->Yaw		= atan2(2 * q1 * q2 - 2 * q0 * q3, 2 * q0*q0 + 2 * q1 * q1 - 1) * RAD2DEG;
-    DataStruct->Pitch	= atan(gx / sqrt(gy*gy + gz*gz))  								* RAD2DEG;
-    DataStruct->Roll	= atan(gy / sqrt(gx*gx + gz*gz))  								* RAD2DEG;
+    IMU_Struct->Yaw		= atan2(2 * q1 * q2 - 2 * q0 * q3, 2 * q0*q0 + 2 * q1 * q1 - 1) * RAD2DEG;
+    IMU_Struct->Pitch	= atan(gx / sqrt(gy*gy + gz*gz))  								* RAD2DEG;
+    IMU_Struct->Roll	= atan(gy / sqrt(gx*gx + gz*gz))  								* RAD2DEG;
+    IMU_Struct->GyroZ	= GyroZ_RadPerS * RAD2DEG;
 }

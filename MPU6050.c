@@ -178,7 +178,6 @@ void vTaskI2C_MPU6050(void * pvParameters)
 
 	IMU_t IMU_Struct;
 	vIMU_initStruct(&IMU_Struct);
-	vIMU_getAngles(&IMU_Struct);
 
 	/* MPU6050 initialization */
 	MPU6050_t MPU6050_Struct;
@@ -202,8 +201,8 @@ void vTaskI2C_MPU6050(void * pvParameters)
 			MPU6050_Struct.Accelerometer_Y,
 			MPU6050_Struct.Accelerometer_Z);
 
-		/* Calculate Aerospace sequence Euler angles */
-		vIMU_getAngles(&IMU_Struct);
+		/* Calculate Aerospace sequence Euler angles & update IMU_Structure */
+		vIMU_getAngles(&IMU_Struct, MPU6050_Struct.Gx);
 
 		if( xSemaphoreTake(xSemaphoreUART_NAVITX, 10))
 		{

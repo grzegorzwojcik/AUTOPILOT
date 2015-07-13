@@ -144,20 +144,14 @@ void vUART_ClearBuffer(UARTbuffer_t	UART_buffer){
 			MPU6050_Structure.Gyroscope_Y,
 			MPU6050_Structure.Gyroscope_Z);*/
 
-	//QUADROPLOT2 FRAME
-	/*sprintf(GV_bufferNAVIsend, "a%i\nb%i\nc%i\n",
-			(int) yaw,
-			(int) pitch,
-			(int) roll);*/
+/*           //QUADROPLOT FRAME
+sprintf(GV_bufferNAVIsend, "a%i\nb%i\nc%i\nd%i\n",
+		IMU_Struct.Yaw,
+		IMU_Struct.Pitch,
+		IMU_Struct.Roll,
+		IMU_Struct.GyroZ);
+vUART_puts(USART2, GV_bufferNAVIsend);*/
 
-	//NAVIGATION BOARD FRAME
-	/*sprintf(tmp_buffer, "%c,8,%i,%i,%i,0,*", NAVI_DF_CHAR,
-			MPU6050_Structure.Gyroscope_X,
-			MPU6050_Structure.Gyroscope_Y,
-			MPU6050_Structure.Gyroscope_Z);
-	// Adding calculated CRC to this string
-	sprintf(GV_bufferNAVIsend, "%s%i\n\r", tmp_buffer,
-			ucUART_calculateCRC(tmp_buffer, NAVI_DF_CHAR, NAVI_BUFFER_LENGTH) );*/
 void vTaskUART_NAVI(void * pvParameters)
 {
 	/* Local variables. */
@@ -171,18 +165,27 @@ void vTaskUART_NAVI(void * pvParameters)
 	vIMU_initStruct(&IMU_Struct);
 
 	for(;;){
-		/*		 10ms delay [100 Hz].	 */
+		/*		 20ms delay [50 Hz].	 */
 		vTaskDelayUntil( &xLastFlashTime, 20 );
+
+		/* Receive IMU_Structure */
 		xQueueReceive(xQueueUART_1xIMU_t, &IMU_Struct, 0);
+		/* Allow putting another IMU_Structure to the xQueueUART_1xIMU_t */
 		xSemaphoreGive(xSemaphoreUART_NAVITX);
 
+		/* Clear buffer before updating it */
 		vUART_ClearBuffer(UART_NaviBufferSEND);
-		//char tmp_buffer[NAVI_BUFFER_LENGTH] = {0};
 
-		sprintf(GV_bufferNAVIsend, "a%i\nb%i\nc%i\n",
+		/* Send data to the Navigation & Fault injection board */
+		char tmp_buffer[NAVI_BUFFER_LENGTH] = {0};
+		sprintf(tmp_buffer, "%c,3,%i,%i,%i,%i,*", NAVI_DF_CHAR,
 				IMU_Struct.Yaw,
 				IMU_Struct.Pitch,
-				IMU_Struct.Roll);
+				IMU_Struct.Roll,
+				IMU_Struct.GyroZ);
+			// Add calculated CRC to this string.
+		sprintf(GV_bufferNAVIsend, "%s%i\n\r", tmp_buffer,
+				ucUART_calculateCRC(tmp_buffer, NAVI_DF_CHAR, NAVI_BUFFER_LENGTH) );
 		vUART_puts(USART2, GV_bufferNAVIsend);
 	}
 }
