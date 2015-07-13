@@ -181,9 +181,11 @@ void vhADC_init(void){
 /****				TASKS				****/
 void vTaskADC_VoltPwr(void * pvParameters)
 {
+	SENSOR_t SENSOR_Struct;
+	vSENSOR_initStruct(&SENSOR_Struct);
+
 	/* Local variables. */
-	static uint32_t voltage = 0;
-	static uint16_t multiplier = 4400;
+	static uint16_t v_divider = 4400;	// resistor relation value of the voltage divider
 	/*
 	 * ADC_CONVERTED_VALUES[0] is related to Power Supply voltage measurement
 	 * ADC_CONVERTED_VALUES[1] is related to IR Sensor voltage measurement
@@ -192,8 +194,10 @@ void vTaskADC_VoltPwr(void * pvParameters)
 	for(;;){
 		if( xSemaphoreTake(xSemaphoreADC_VoltPwr, 100 ) == pdTRUE)
 		{
-			uint32_t tmp = ADC_CONVERTED_VALUES[0] * multiplier;
-			voltage = tmp*3.3/4095;
+			uint32_t tmp = ADC_CONVERTED_VALUES[0] * v_divider;
+			SENSOR_Struct.PS_Voltage = tmp*3.3/4095;
+			SENSOR_Struct.IR_Sensor = ADC_CONVERTED_VALUES[1];
+			xQueueSend(xQueueUART_1xSENSOR_t, &SENSOR_Struct, 0);
 		}
 	}
 }

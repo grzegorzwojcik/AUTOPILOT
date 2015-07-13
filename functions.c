@@ -16,10 +16,8 @@ FlagStatus SYSTEM_ClockCheck(void)
 	RCC_ClocksTypeDef ClksFreq;
 	RCC_GetClocksFreq(&ClksFreq);
 
-	if( ClksFreq.SYSCLK_Frequency == 168000000 ){
-		if( ClksFreq.HCLK_Frequency == 168000000 ){
-			return SET;
-		}
+	if( ClksFreq.HCLK_Frequency == 168000000 ){
+		return SET;
 	}
 	else
 		return RESET;
@@ -77,4 +75,11 @@ void vStartLEDTasks(unsigned portBASE_TYPE uxPriority)
 	xTaskHandle xHandleTaskLED1, xHandleTaskLED2;
 	xTaskCreate(vTaskLED1, "LED1", configMINIMAL_STACK_SIZE, NULL, uxPriority, &xHandleTaskLED1);
 	xTaskCreate(vTaskLED2, "LED2", configMINIMAL_STACK_SIZE, NULL, uxPriority, &xHandleTaskLED2);
+}
+
+
+void vSENSOR_initStruct(SENSOR_t* SENSOR_Struct)
+{
+	SENSOR_Struct->IR_Sensor = 0;
+	SENSOR_Struct->PS_Voltage = 0;
 }

@@ -29,9 +29,16 @@ SemaphoreHandle_t xSemaphoreUART_NAVITX;
 SemaphoreHandle_t xSemaphoreUART_NAVIRX;
 
 			/* 			Queues.			 */
-QueueHandle_t xQueueUART_1xMPU_t;
 QueueHandle_t xQueueUART_1xIMU_t;
+QueueHandle_t xQueueUART_1xSENSOR_t;
 /*===========================================================*/
+
+/* Private typedefs ----------------------------------------------------------*/
+typedef struct {
+	/* Private */
+	uint16_t PS_Voltage;	//[mV] i.e. 12600 means 12.6V
+	uint16_t IR_Sensor;
+} SENSOR_t;
 
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
@@ -48,6 +55,7 @@ void vhLED_initGPIO(void);
 void vTaskLED1(void * pvParameters);
 void vTaskLED2(void * pvParameters);
 void vStartLEDTasks(unsigned portBASE_TYPE uxPriority);
+void vSENSOR_initStruct(SENSOR_t* SENSOR_Struct);
 #endif /* FUNCTIONS_H_ */
 
 

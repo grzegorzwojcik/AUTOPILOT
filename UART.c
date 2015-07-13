@@ -133,8 +133,8 @@ void vUART_ClearBuffer(UARTbuffer_t	UART_buffer){
 /****				TASKS				****/
 
 /*-----------------------------------------------------------
-* @brief Task Name 		: vTaskUART_NAVI
-* @brief Description    : This task is responsible for sending proper data frames to the
+* @brief Task Name 		: vTaskUART_NAVIimu
+* @brief Description    : This task is responsible for sending IMU data frames to the
 * 							 NAVIGATION & FAULT INJECTION BOARD by managing a semaphore
 */
 
@@ -152,21 +152,18 @@ sprintf(GV_bufferNAVIsend, "a%i\nb%i\nc%i\nd%i\n",
 		IMU_Struct.GyroZ);
 vUART_puts(USART2, GV_bufferNAVIsend);*/
 
-void vTaskUART_NAVI(void * pvParameters)
+void vTaskUART_NAVIimu(void * pvParameters)
 {
 	/* Local variables. */
 	portTickType xLastFlashTime;
 	xLastFlashTime = xTaskGetTickCount();
 
-	MPU6050_t MPU6050_Struct;
-	vMPU6050_initStruct(&MPU6050_Struct);
-
 	IMU_t IMU_Struct;
 	vIMU_initStruct(&IMU_Struct);
 
+	/*		 25 Hz task [40 ms delay]		 */
 	for(;;){
-		/*		 20ms delay [50 Hz].	 */
-		vTaskDelayUntil( &xLastFlashTime, 20 );
+		vTaskDelayUntil( &xLastFlashTime, 40 );
 
 		/* Receive IMU_Structure */
 		xQueueReceive(xQueueUART_1xIMU_t, &IMU_Struct, 0);
@@ -191,6 +188,47 @@ void vTaskUART_NAVI(void * pvParameters)
 }
 
 
+/*-----------------------------------------------------------
+* @brief Task Name 		: vTaskUART_NAVIsns
+* @brief Description    : This task is responsible for sending SENSOR data frames to the
+* 							 NAVIGATION & FAULT INJECTION BOARD by managing a semaphore
+*/
+void vTaskUART_NAVIsns(void * pvParameters)
+{
+	/* Local variables. */
+	portTickType xLastFlashTime;
+	xLastFlashTime = xTaskGetTickCount();
+
+	SENSOR_t SENSOR_Struct;
+	vSENSOR_initStruct(&SENSOR_Struct);
+
+	/*		 10 Hz task [100 ms delay]		 */
+	for(;;){
+		vTaskDelayUntil( &xLastFlashTime, 100 );
+
+		/* Clear buffer before updating it */
+		vUART_ClearBuffer(UART_NaviBufferSEND);
+
+		/* Receive IMU_Structure */
+		xQueueReceive(xQueueUART_1xSENSOR_t, &SENSOR_Struct, 0);
+
+		/* Send data to the Navigation & Fault injection board */
+		char tmp_buffer[NAVI_BUFFER_LENGTH] = {0};
+		sprintf(tmp_buffer, "%c,4,%i,%i,0,0,*", NAVI_DF_CHAR,
+				SENSOR_Struct.PS_Voltage,
+				SENSOR_Struct.IR_Sensor);
+			// Add calculated CRC to this string.
+		sprintf(GV_bufferNAVIsend, "%s%i\n\r", tmp_buffer,
+				ucUART_calculateCRC(tmp_buffer, NAVI_DF_CHAR, NAVI_BUFFER_LENGTH) );
+		vUART_puts(USART2, GV_bufferNAVIsend);
+
+	/*	sprintf(GV_bufferNAVIsend, "a%i\nb%i\n",
+				SENSOR_Struct.PS_Voltage,
+				SENSOR_Struct.IR_Sensor);
+		vUART_puts(USART2, GV_bufferNAVIsend); // QUADROPLOT DATA FRAME*/
+	}
+}
+
 void vStartUART_NAVITask(unsigned portBASE_TYPE uxPriority)
 {
 	/* Creating semaphore related to this task */
@@ -202,11 +240,19 @@ void vStartUART_NAVITask(unsigned portBASE_TYPE uxPriority)
 
 	/* Creating queue which is responsible for handling IMU_t typedef data */
 	xQueueUART_1xIMU_t = xQueueCreate(1, sizeof(IMU_t) );
+	/* Creating queue which is responsible for handling SENSOR_t typedef data */
+	xQueueUART_1xSENSOR_t = xQueueCreate(1, sizeof(SENSOR_t) );
 
-	/* Creating task  */
-	xTaskHandle xHandleTaskUART_NAVI;
-	xTaskCreate( vTaskUART_NAVI, "UART_NAVI_TX", configMINIMAL_STACK_SIZE,
-			NULL, uxPriority, &xHandleTaskUART_NAVI );
+
+	/* Creating task [sending IMU data frames] 25 Hz task */
+	xTaskHandle xHandleTaskUART_NAVIimu;
+	xTaskCreate( vTaskUART_NAVIimu, "UART_NAVI_TXimu", configMINIMAL_STACK_SIZE,
+			NULL, uxPriority, &xHandleTaskUART_NAVIimu );
+
+	/* Creating task [sending SENSOR data frames] 10 Hz task*/
+	xTaskHandle xHandleTaskUART_NAVIsns;
+	xTaskCreate( vTaskUART_NAVIsns, "UART_NAVI_TXsns", configMINIMAL_STACK_SIZE,
+			NULL, uxPriority, &xHandleTaskUART_NAVIsns );
 }
 
 

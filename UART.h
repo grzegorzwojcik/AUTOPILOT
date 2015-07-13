@@ -73,7 +73,8 @@ void vUART_puts(USART_TypeDef* USARTx, volatile char *s);
 void vUART_ClearBuffer(UARTbuffer_t	UART_buffer);
 
 /*			 Tasks 			*/
-void vTaskUART_NAVI(void * pvParameters);
+void vTaskUART_NAVIimu(void * pvParameters);	//Send imu data frame
+void vTaskUART_NAVIsns(void * pvParameters);	//Send sensor data frame
 void vStartUART_NAVITask(unsigned portBASE_TYPE uxPriority);
 
 #endif /* UART_H_ */
