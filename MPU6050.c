@@ -204,10 +204,7 @@ void vTaskI2C_MPU6050(void * pvParameters)
 		/* Calculate Aerospace sequence Euler angles & update IMU_Structure */
 		vIMU_getAngles(&IMU_Struct, MPU6050_Struct.Gx);
 
-		if( xSemaphoreTake(xSemaphoreUART_NAVITX, 10))
-		{
-			xQueueSend(xQueueUART_1xIMU_t, &IMU_Struct, 0);
-		}
+		xQueueSend(xQueueUART_1xIMU_t, &IMU_Struct, 0);
 		/*		100 Hz loop / 10ms delay	*/
 		vTaskDelayUntil(&xLastFlashTime, 10 );
 	}

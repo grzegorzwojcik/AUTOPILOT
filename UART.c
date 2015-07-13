@@ -166,24 +166,29 @@ void vTaskUART_NAVIimu(void * pvParameters)
 		vTaskDelayUntil( &xLastFlashTime, 40 );
 
 		/* Receive IMU_Structure */
-		xQueueReceive(xQueueUART_1xIMU_t, &IMU_Struct, 0);
-		/* Allow putting another IMU_Structure to the xQueueUART_1xIMU_t */
-		xSemaphoreGive(xSemaphoreUART_NAVITX);
+		xQueueReceive(xQueueUART_1xIMU_t, &IMU_Struct, 10);
 
-		/* Clear buffer before updating it */
-		vUART_ClearBuffer(UART_NaviBufferSEND);
+		/* Sharing xSemaphoreUART_NAVITX MUTEX with vTaskUART_NAVIsns task */
+		if( xSemaphoreTake(xSemaphoreUART_NAVITX, 40))
+		{
+			/* Clear buffer before updating it */
+			vUART_ClearBuffer(UART_NaviBufferSEND);
 
-		/* Send data to the Navigation & Fault injection board */
-		char tmp_buffer[NAVI_BUFFER_LENGTH] = {0};
-		sprintf(tmp_buffer, "%c,3,%i,%i,%i,%i,*", NAVI_DF_CHAR,
-				IMU_Struct.Yaw,
-				IMU_Struct.Pitch,
-				IMU_Struct.Roll,
-				IMU_Struct.GyroZ);
-			// Add calculated CRC to this string.
-		sprintf(GV_bufferNAVIsend, "%s%i\n\r", tmp_buffer,
-				ucUART_calculateCRC(tmp_buffer, NAVI_DF_CHAR, NAVI_BUFFER_LENGTH) );
-		vUART_puts(USART2, GV_bufferNAVIsend);
+			/* Send data to the Navigation & Fault injection board */
+			char tmp_buffer[NAVI_BUFFER_LENGTH] = {0};
+			sprintf(tmp_buffer, "%c,3,%i,%i,%i,%i,*", NAVI_DF_CHAR,
+					IMU_Struct.Yaw,
+					IMU_Struct.Pitch,
+					IMU_Struct.Roll,
+					IMU_Struct.GyroZ);
+				// Add calculated CRC to this string.
+			sprintf(GV_bufferNAVIsend, "%s%i\n\r", tmp_buffer,
+					ucUART_calculateCRC(tmp_buffer, NAVI_DF_CHAR, NAVI_BUFFER_LENGTH) );
+			vUART_puts(USART2, GV_bufferNAVIsend);
+
+			xSemaphoreGive(xSemaphoreUART_NAVITX);
+		}
+
 	}
 }
 
@@ -206,27 +211,33 @@ void vTaskUART_NAVIsns(void * pvParameters)
 	for(;;){
 		vTaskDelayUntil( &xLastFlashTime, 100 );
 
-		/* Clear buffer before updating it */
-		vUART_ClearBuffer(UART_NaviBufferSEND);
-
 		/* Receive IMU_Structure */
-		xQueueReceive(xQueueUART_1xSENSOR_t, &SENSOR_Struct, 0);
+		xQueueReceive(xQueueUART_1xSENSOR_t, &SENSOR_Struct, 100);
 
-		/* Send data to the Navigation & Fault injection board */
-		char tmp_buffer[NAVI_BUFFER_LENGTH] = {0};
-		sprintf(tmp_buffer, "%c,4,%i,%i,0,0,*", NAVI_DF_CHAR,
-				SENSOR_Struct.PS_Voltage,
-				SENSOR_Struct.IR_Sensor);
-			// Add calculated CRC to this string.
-		sprintf(GV_bufferNAVIsend, "%s%i\n\r", tmp_buffer,
-				ucUART_calculateCRC(tmp_buffer, NAVI_DF_CHAR, NAVI_BUFFER_LENGTH) );
-		vUART_puts(USART2, GV_bufferNAVIsend);
+		/* Sharing xSemaphoreUART_NAVITX MUTEX with vTaskUART_NAVIimu task */
+		if( xSemaphoreTake(xSemaphoreUART_NAVITX, 0))
+		{
+			/* Clear buffer before updating it */
+			vUART_ClearBuffer(UART_NaviBufferSEND);
 
+			/* Send data to the Navigation & Fault injection board */
+			char tmp_buffer[NAVI_BUFFER_LENGTH] = {0};
+			sprintf(tmp_buffer, "%c,4,%i,%i,0,0,*", NAVI_DF_CHAR,
+					SENSOR_Struct.PS_Voltage,
+					SENSOR_Struct.IR_Sensor);
+				// Add calculated CRC to this string.
+			sprintf(GV_bufferNAVIsend, "%s%i\n\r", tmp_buffer,
+					ucUART_calculateCRC(tmp_buffer, NAVI_DF_CHAR, NAVI_BUFFER_LENGTH) );
+			vUART_puts(USART2, GV_bufferNAVIsend);
+
+			/* Allow putting another IMU_Structure to the xQueueUART_1xIMU_t */
+			xSemaphoreGive(xSemaphoreUART_NAVITX);
+		}
+	}
 	/*	sprintf(GV_bufferNAVIsend, "a%i\nb%i\n",
 				SENSOR_Struct.PS_Voltage,
 				SENSOR_Struct.IR_Sensor);
 		vUART_puts(USART2, GV_bufferNAVIsend); // QUADROPLOT DATA FRAME*/
-	}
 }
 
 void vStartUART_NAVITask(unsigned portBASE_TYPE uxPriority)
@@ -236,7 +247,7 @@ void vStartUART_NAVITask(unsigned portBASE_TYPE uxPriority)
 	xSemaphoreUART_NAVIRX = xSemaphoreCreateBinary();
 
 	xSemaphoreUART_NAVITX = NULL;
-	xSemaphoreUART_NAVITX = xSemaphoreCreateBinary();
+	xSemaphoreUART_NAVITX = xSemaphoreCreateMutex();
 
 	/* Creating queue which is responsible for handling IMU_t typedef data */
 	xQueueUART_1xIMU_t = xQueueCreate(1, sizeof(IMU_t) );

@@ -25,7 +25,7 @@
 
 			/* 			Semaphores.			 */
 SemaphoreHandle_t xSemaphoreADC_VoltPwr;
-SemaphoreHandle_t xSemaphoreUART_NAVITX;
+SemaphoreHandle_t xSemaphoreUART_NAVITX;	//MUTEX
 SemaphoreHandle_t xSemaphoreUART_NAVIRX;
 
 			/* 			Queues.			 */
