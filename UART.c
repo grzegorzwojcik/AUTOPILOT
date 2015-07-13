@@ -188,7 +188,6 @@ void vTaskUART_NAVIimu(void * pvParameters)
 
 			xSemaphoreGive(xSemaphoreUART_NAVITX);
 		}
-
 	}
 }
 

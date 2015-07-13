@@ -41,13 +41,6 @@ typedef struct {
 	int16_t GyroZ;
 } IMU_t;
 
-/*-----------------------------------------------------------
-* @brief Function Name  : FUSION_filterUpdate
-* @brief Description    : This function is related to MPU6050 data fusion,
-* 							it updates global quaternion variables SEq_x
-* @param w_x, w_y, w_z	: gyroscope measurements [rad/s]
-* @param a_x, a_y, a_z	: accelerometer measurements
-*/
 void vIMU_filterUpdate(float gx, float gy, float gz, float ax, float ay, float az);
 void vIMU_getAngles(IMU_t* IMU_Struct, float GyroZ_RadPerS);
 void vIMU_initStruct(IMU_t* IMU_Struct);

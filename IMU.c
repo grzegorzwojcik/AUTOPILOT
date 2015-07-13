@@ -11,9 +11,11 @@
  */
 #include "IMU.h"
 
+
 /*-----------------------------------------------------------
 * @brief Function Name  : vIMU_filterUpdate
-* @brief Description    : This function obtains quaternion bases on gyroscope & accelerometer data
+* @brief Description    : This function is related to MPU6050 data fusion,
+* 							based on gyroscope & accelerometer measurements
 * @param gx, gy, gz		: angular velocity [rad/s]
 * @param ax, ay, az		: linear acceleration [raw data from MPU6050!]
 */
