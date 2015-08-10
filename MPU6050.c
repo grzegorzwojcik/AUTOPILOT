@@ -10,7 +10,6 @@
 
 void vMPU6050_initStruct(MPU6050_t* MPU6050_Struct)
 {
-	//MPU6050_t MPU6050_Struct;
 	MPU6050_Struct->Address = MPU6050_I2C_ADDR | TM_MPU6050_Device_1;
 	MPU6050_Struct->Acce_Mult		=	0;
 	MPU6050_Struct->Accelerometer_X	=	0;
@@ -202,7 +201,7 @@ void vTaskI2C_MPU6050(void * pvParameters)
 			MPU6050_Struct.Accelerometer_Z);
 
 		/* Calculate Aerospace sequence Euler angles & update IMU_Structure */
-		vIMU_getAngles(&IMU_Struct, MPU6050_Struct.Gx);
+		vIMU_getAngles(&IMU_Struct, MPU6050_Struct.Gz);
 
 		xQueueSend(xQueueUART_1xIMU_t, &IMU_Struct, 0);
 		/*		100 Hz loop / 10ms delay	*/
