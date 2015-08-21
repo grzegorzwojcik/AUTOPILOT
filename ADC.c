@@ -191,11 +191,34 @@ void vTaskADC_VoltPwr(void * pvParameters)
 	 * ADC_CONVERTED_VALUES[1] is related to IR Sensor voltage measurement
 	 */
 
+	static uint32_t moving_average = 0;
+	static uint16_t buffor[21] = {0};
+	static uint8_t i = 0, k = 0;
+
 	for(;;){
 		if( xSemaphoreTake(xSemaphoreADC_VoltPwr, 100 ) == pdTRUE)
 		{
-			uint32_t tmp = ADC_CONVERTED_VALUES[0] * v_divider;
-			SENSOR_Struct.PS_Voltage = tmp*3.3/4095;
+
+			/*** Moving average ***/
+			buffor[i] = ADC_CONVERTED_VALUES[0];
+			if( i >= 19 )	// collecting buffor
+			{
+				uint8_t j = 0;
+				for( j = 0; j < 20; j++ ){
+					buffor[j] = buffor[j+1];
+				}
+			}
+			else
+				i++;
+			for( moving_average = 0, k = 0; k < 20; k++ )	//summing up the buffor
+			{
+				moving_average += buffor[k];
+			}
+			moving_average /= 20;							//calculating average of the buffor
+			moving_average *= v_divider;
+			/*** Moving average ***/
+
+			SENSOR_Struct.PS_Voltage = moving_average*3.3/4095;
 			SENSOR_Struct.IR_Sensor = ADC_CONVERTED_VALUES[1];
 			xQueueSend(xQueueUART_1xSENSOR_t, &SENSOR_Struct, 0);
 		}
